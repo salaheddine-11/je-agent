@@ -336,15 +336,18 @@ function Review({ runId }) {
   const [u, setU] = useState(null);
   const [reviewer, setReviewer] = useState("jdoe");
   const [msg, setMsg] = useState("");
+  const [reasoning, setReasoning] = useState({ ref: null, decision: null, text: "" });
   const load = () => api.universe(runId).then(setU).catch(e => setMsg(e.message));
   useEffect(() => { load(); }, [runId]);
   if (!u) return <div style={card}>Loading review queue…</div>;
   const decided = u.entries.filter(e => e.decision !== "pending");
   const pending = u.entries.filter(e => e.decision === "pending");
-  const decide = async (ref, decision) => {
-    const reason = prompt(`Reason for ${decision} on ${ref}:`) || "";
-    if (!reason) return;
-    await api.saveDecisions(runId, reviewer, [{ entry_ref: ref, decision, reason }]);
+  const ask = (ref, decision) => setReasoning({ ref, decision, text: "" });
+  const confirm = async () => {
+    const { ref, decision, text } = reasoning;
+    if (!text.trim()) { setMsg("A reason is required."); return; }
+    await api.saveDecisions(runId, reviewer, [{ entry_ref: ref, decision, reason: text }]);
+    setReasoning({ ref: null, decision: null, text: "" });
     setMsg(`Recorded ${decision} for ${ref} (hash-chained)`);
     load();
   };
@@ -370,6 +373,20 @@ function Review({ runId }) {
         </div>
       </div>
       {msg && <p style={{ fontSize: 12.5, color: SLATE, margin: "0 0 10px" }}>{msg}</p>}
+      {reasoning.ref && (
+        <div style={{ ...card, border: `1.5px solid ${AMBER}`, marginBottom: 14 }}>
+          <label style={label}>Reason for {reasoning.decision} on {reasoning.ref}</label>
+          <textarea style={{ ...input, fontFamily: mono, minHeight: 80, fontSize: 12.5 }}
+                    autoFocus value={reasoning.text}
+                    onChange={e => { setReasoning({ ...reasoning, text: e.target.value }); setMsg(""); }}
+                    onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) confirm(); }} />
+          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+            <button style={btn} onClick={confirm}>✔ Confirm</button>
+            <button style={btnGhost} onClick={() => setReasoning({ ref: null, decision: null, text: "" })}>
+              Cancel</button>
+            <span style={{ fontSize: 11, color: FAINT, alignSelf: "center" }}>Ctrl/Cmd+Enter to submit</span>
+          </div>
+        </div>)}
       <div style={card}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
           <thead><tr style={{ textAlign: "left", color: SLATE, fontSize: 10.5,
@@ -399,9 +416,9 @@ function Review({ runId }) {
                 <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`, whiteSpace: "nowrap" }}>
                   {e.decision === "pending" ? (
                     <>
-                      <button onClick={() => decide(e.entry_ref, "inspect")}
+                      <button onClick={() => ask(e.entry_ref, "inspect")}
                               style={{ ...btn, padding: "4px 9px", fontSize: 11.5 }}>inspect</button>{" "}
-                      <button onClick={() => decide(e.entry_ref, "accept")}
+                      <button onClick={() => ask(e.entry_ref, "accept")}
                               style={{ ...btnGhost, padding: "4px 9px", fontSize: 11.5 }}>accept</button>
                     </>) : <span style={{ color: OI_GREEN }}>✓</span>}
                 </td>
@@ -418,6 +435,7 @@ function Review({ runId }) {
 // ————————————————————————————— REPORT (deliverables + metrics snapshot)
 function Report({ runId }) {
   const [m, setM] = useState(null);
+  const [dl, setDl] = useState("");
   useEffect(() => { api.metrics(runId).then(setM).catch(() => {}); }, [runId]);
   const arts = ["report.pdf", "report.html", "workpaper.xlsx", "flagged_entries.xlsx"];
   return (
@@ -439,11 +457,16 @@ function Report({ runId }) {
         <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
                      color: SLATE, margin: "0 0 14px" }}>Deliverables</h2>
         {arts.map(n => (
-          <a key={n} href={api.artifactUrl(runId, n)} target="_blank" rel="noreferrer"
-             style={{ display: "flex", justifyContent: "space-between", padding: "10px 0",
-                      fontSize: 13, color: INK, textDecoration: "none",
-                      borderBottom: `1px solid ${HAIR}` }}>
-            <span>⬇️ {n}</span><span style={{ color: SLATE }}>download</span></a>))}
+          <button key={n} onClick={async () => {
+            try { await api.download(runId, n); }
+            catch (e) { setDl(e.message); }
+          }}
+            style={{ display: "flex", justifyContent: "space-between", width: "100%",
+                     padding: "10px 0", fontSize: 13, color: INK, cursor: "pointer",
+                     border: "none", borderBottom: `1px solid ${HAIR}`, background: "transparent" }}>
+            <span>⬇️ {n}</span><span style={{ color: SLATE }}>download</span>
+          </button>))}
+        {dl && <p style={{ fontSize: 12, color: OI_VERM, marginTop: 8 }}>{dl}</p>}
       </div>
       {m?.benford?.mad != null && (
         <div style={card}>

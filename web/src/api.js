@@ -48,4 +48,16 @@ export const api = {
     }).then(r => r.json());
   },
   artifactUrl: (id, name) => `${BASE}/api/runs/${id}/artifacts/${name}`,
+  download: async (id, name) => {
+    const res = await fetch(`${BASE}/api/runs/${id}/artifacts/${name}`, {
+      headers: { "X-API-Key": sessionStorage.getItem("jeagent_key") || "" },
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  },
 };
