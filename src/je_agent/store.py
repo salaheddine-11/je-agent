@@ -123,6 +123,13 @@ class RunStore:
         )
         self.con.commit()
 
+    def record_decisions_batch(self, run_id: str, reviewer: str,
+                               basis: str, inputs: list) -> int:
+        """API-facing batch wrapper around review.submit_decisions."""
+        from .review import submit_decisions
+
+        return submit_decisions(self, run_id, reviewer, basis, inputs)
+
     def events(self, run_id: str) -> list[tuple]:
         return self.con.execute(
             "SELECT ts, kind, detail FROM events WHERE run_id = ? ORDER BY id", [run_id]

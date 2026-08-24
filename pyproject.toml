@@ -19,6 +19,9 @@ dependencies = [
     "streamlit>=1.62.0",
     "pypdfium2>=5.13.0",
     "playwright>=1.62.0",
+    "fastapi>=0.141.1",
+    "uvicorn[standard]>=0.52.4",
+    "python-multipart>=0.0.32",
 ]
 
 [dependency-groups]
