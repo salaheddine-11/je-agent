@@ -1,0 +1,55 @@
+[project]
+name = "je-agent"
+version = "1.0.0"
+description = "JE Agent — Journal Entry Testing AI Agent per ISA 240 / AS 2401 (deterministic core, Phase 1)"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Proprietary" }
+authors = [{ name = "salah eddine" }]
+dependencies = [
+    "duckdb>=1.1",
+    "pydantic>=2.9",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+    "rich>=13.7",
+    "psutil>=5.9",
+    "pandas>=2.2",
+    "xlsxwriter>=3.2",
+    "requests>=2.34.2",
+    "streamlit>=1.62.0",
+    "pypdfium2>=5.13.0",
+    "playwright>=1.62.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-timeout>=2.3",
+    # scikit-learn arrives with Phase 2 statistics tools; kept out of Phase 1 deps
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/je_agent"]
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not fullscale' -q"
+markers = [
+    "fullscale: full-scale performance benchmarks (excluded locally per DESIGN §9.4 / v1.6 Z4)",
+    "windows_only: tests that must pass on Windows specifically (Z5)",
+]
+timeout = 300
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[project.scripts]
+jeagent = "je_agent.cli:app"

@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.coverage
+# uv.lock IS committed (reproducibility identity) — no ignore entry for it
+
+# Run artifacts (never commit engagement data)
+runs/
+*.duckdb
+*.duckdb.wal
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Generated fixtures (deterministic - regenerate, do not commit)
+tests/fixtures/*.csv
+
+runs_smoke*/
+runs_pilot*/
+# --- client data & run outputs: never publish ---
+runs/
+runs_*/
+runs_audit/
+e2e_runs/
+audit_decisions.json
+decisions*.json
+*_output.log
+audit_run.log
+review_resume.log
+report_shot.png
+cover_page.png
+cover_v2.png
+pdf_page_*.png
+pdf_v3_*.png
+audit_report_final.pdf
+sap_pilot_extract.csv
+e2e_config.yaml
+
+# Pilot extracts (client data - never commit)
+sap_pilot_extract.csv
+
+runs_smoke*/
+
+# UI runtime artifacts
+_ui_uploads/
+streamlit_boot.log
