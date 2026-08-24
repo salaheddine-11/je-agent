@@ -352,9 +352,20 @@ function Review({ runId }) {
     load();
   };
   const finalize = async () => {
-    const r = await api.finalize(runId);
-    setMsg(r.finalized ? `✔ Finalized — ${r.artifacts.join(", ")}`
-                       : `Gates blocked: ${(r.problems || []).join(" | ")}`);
+    setMsg("Finalizing — running triage/narrative if missing…");
+    try {
+      const r = await api.finalize(runId);
+      if (r.status === "finalized") {
+        setMsg(`✔ Finalized — ${r.artifacts.join(", ")}`);
+      } else {
+        setMsg(`⏳ Not finalized — gates: ` +
+          `${r.gates && r.gates.g1_review ? "review✓" : "review✗"} ` +
+          `${r.gates && r.gates.g2_procedures ? "procedures✓" : "procedures✗"} ` +
+          `${r.gates && r.gates.g3_citations ? "citations✓" : "citations✗"} ` +
+          `${r.gates && r.gates.g4_limitations ? "limitations✓" : "limitations✗"}. ` +
+          `(${(r.gates && r.gates.problems || []).slice(0, 2).join("; ")})`);
+      }
+    } catch (e) { setMsg(`✖ ${e.message}`); }
     load();
   };
   return (

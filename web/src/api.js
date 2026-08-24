@@ -33,7 +33,9 @@ export const api = {
     const r = await fetch(`${BASE}/api/runs/${id}/finalize`, {
       method: "POST", headers: { "X-API-Key": sessionStorage.getItem("jeagent_key") || "" },
     });
-    return r.json();
+    const body = await r.json();
+    if (body.detail) throw new Error(body.detail);
+    return body;
   },
   testConnection: body =>
     req("/api/provider/test-connection", { method: "POST", body: JSON.stringify(body) }),

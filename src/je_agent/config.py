@@ -167,6 +167,18 @@ class Reviewer(BaseModel):
     name: str = Field(min_length=1)  # C5 declared identity
 
 
+class Provider(BaseModel):
+    """LLM provider for the run. base_url + model are stored in config; the API
+    key comes from the environment (JEAGENT_API_KEY / GEMINI_API_KEY) so it is
+    never persisted or committed. OpenAI-compatible endpoints only."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    base_url: str = Field(
+        default="https://generativelanguage.googleapis.com/v1beta/openai")
+    model: str = Field(default="gemini-3.5-flash-lite")
+
+
 class EngagementConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -180,6 +192,7 @@ class EngagementConfig(BaseModel):
     representative_sample: RepresentativeSample = Field(default_factory=RepresentativeSample)
     review: Review = Field(default_factory=Review)
     rule_params: RuleParams = Field(default_factory=RuleParams)
+    provider: Provider = Field(default_factory=Provider)
     reviewer: Reviewer
 
 

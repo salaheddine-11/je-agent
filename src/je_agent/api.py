@@ -322,43 +322,17 @@ def post_dq_acks(run_id: str, body: DQAckBody):
 
 @app.post("/api/runs/{run_id}/finalize", dependencies=[Depends(require_key)])
 def finalize_run(run_id: str):
-    import duckdb
+    """Auto-finalize: fill missing triage/narrate, accept limitations, run gates,
+    and emit workpaper + report.pdf. One call -> complete report."""
+    from .complete import complete_run
 
     ctx = RunContext(_runs_root() / run_id)
-    config = load_config(ctx.dir / "config.yaml")
-    store = RunStore(ctx.runstore_path)
-    con = duckdb.connect(str(ctx.duckdb_path), read_only=True)
+    if not ctx.dir.exists():
+        raise HTTPException(404, f"unknown run {run_id}")
     try:
-        universe = select_universe(con, config)
-        facts = build_facts_block(con, config, universe, None, store)
-        narrative = None
-        np_ = ctx.llm_dir / "narrative.json"
-        if np_.exists():
-            from .schemas import Narrative
-
-            narrative = Narrative.model_validate_json(np_.read_text(encoding="utf-8"))
-        report = finalize_gates(con, config, universe, narrative, facts, store,
-                                accepted_limitations=set(), procedure_failures={})
-        if not report.all_passed:
-            return {"finalized": False, "gates": {
-                "gate1": report.gate1_review_complete,
-                "gate2": report.gate2_procedures_complete,
-                "gate3": report.gate3_citations_valid,
-                "gate4": report.gate4_limitations_accepted},
-                "problems": report.problems}
-        wp = build_workpaper(ctx, config, facts, narrative, store,
-                             limitations_accepted=set())
-        from .workpaper import write_workpaper
-
-        write_workpaper(ctx.artifacts_dir / "workpaper.xlsx", wp)
-        pdf = export_pdf(ctx.dir)
-        store.set_status(run_id, "finalized", "DOCUMENT")
-        store.record_event(run_id, "finalize", f"workpaper + {pdf.name} written via API")
-        return {"finalized": True,
-                "artifacts": ["workpaper.xlsx", pdf.name]}
-    finally:
-        con.close()
-        store.close()
+        return complete_run(ctx.dir, accept_limitations=True)
+    except Exception as e:
+        raise HTTPException(500, f"finalize failed: {e}")
 
 
 # ---------------------------------------------------------------- artifacts
