@@ -66,7 +66,8 @@ def require_key(x_api_key: str = Header(default="")) -> None:
 @app.get("/health")
 def health():
     """Unauthenticated liveness probe."""
-    return {"status": "ok", "version": "1.0.0"}
+    return {"status": "ok", "version": "1.0.0",
+            "sso_enabled": os.environ.get("JEAGENT_SSO_MODE", "").lower() == "azure"}
 
 
 # ---------------------------------------------------------------- runs

@@ -20,6 +20,11 @@ const card = {
 function Login({ onLogin }) {
   const [key, setKey] = useState("");
   const [err, setErr] = useState("");
+  const [sso, setSso] = useState(false);
+  useState(() => {
+    fetch(`${BASE}/health`).then(r => r.json())
+      .then(h => setSso(!!h.sso_enabled)).catch(() => {});
+  });
   const tryKey = async () => {
     sessionStorage.setItem("jeagent_key", key);
     try {
@@ -44,10 +49,11 @@ function Login({ onLogin }) {
       <button style={{ ...btn, marginTop: 14, width: "100%" }} onClick={tryKey}>
         Continue
       </button>
-      <p style={{ color: SLATE, fontSize: 11.5, marginTop: 16 }}>
-        SSO (Entra ID / Azure AD) plugs in here via the /auth/* seam — the API
-        validates JWTs when JEAGENT_SSO_MODE=azure.
-      </p>
+      {sso && (
+        <p style={{ color: SLATE, fontSize: 11.5, marginTop: 16 }}>
+          Corporate single sign-on (Microsoft Entra ID) is enabled on this server.
+        </p>
+      )}
     </div>
   );
 }
