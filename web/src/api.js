@@ -37,5 +37,15 @@ export const api = {
   },
   testConnection: body =>
     req("/api/provider/test-connection", { method: "POST", body: JSON.stringify(body) }),
+  createEngagement: (configYaml, file) => {
+    const fd = new FormData();
+    fd.append("config_yaml", configYaml);
+    fd.append("extract", file);
+    return fetch(`${BASE}/api/engagements`, {
+      method: "POST",
+      headers: { "X-API-Key": sessionStorage.getItem("jeagent_key") || "" },
+      body: fd,
+    }).then(r => r.json());
+  },
   artifactUrl: (id, name) => `${BASE}/api/runs/${id}/artifacts/${name}`,
 };

@@ -94,15 +94,89 @@ function Configure() {
   );
 }
 
+const DEFAULT_CONFIG = `run_id: DEMO_2026
+period_end: '2026-06-30'
+materiality: {overall: 250000, performance: 175000, currency: USD}
+source:
+  system: sap
+  amount_column: DMBTR
+  currency_column: WAERS
+  column_map:
+    posting_date: BUDAT
+    account: HKONT
+    username: UNAME
+    description: SGTXT
+    source_doc: BELNR
+    entry_ref: BELNR
+    document_date: BLDAT
+  extract_through_date: '2026-07-10'
+risk_context:
+  high_risk_users: [JSMITH]
+review:
+  max_universe_size: 200
+  overflow_policy: stratify
+  pack_size: 20
+llm_privacy:
+  mode: zero_retention
+  pii_scrubbing: true
+reviewer: {name: jdoe}
+`;
+
+// ————————————————————————————— NEW ENGAGEMENT (upload CSV + config, start)
+function NewEngagement({ onStarted }) {
+  const [file, setFile] = useState(null);
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [showConfig, setShowConfig] = useState(false);
+  const start = async () => {
+    if (!file) { setMsg({ ok: false, err: "Choose a CSV extract first." }); return; }
+    setBusy(true); setMsg(null);
+    try {
+      const r = await api.createEngagement(config, file);
+      if (r.detail) throw new Error(r.detail);
+      setMsg({ ok: true, text: `Started ${r.started} — pipeline running.` });
+      onStarted(r.started);
+    } catch (e) { setMsg({ ok: false, err: e.message }); }
+    setBusy(false);
+  };
+  return (
+    <div style={card}>
+      <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                   color: SLATE, margin: "0 0 6px" }}>New engagement</h2>
+      <p style={{ color: SLATE, fontSize: 12.5, margin: "0 0 18px" }}>
+        Upload a journal-entry extract (CSV) and a configuration YAML. The pipeline
+        stages (ingest → rules → cross-ref → triage) are verified as it runs.</p>
+      <label style={label}>Journal-entry extract (CSV)</label>
+      <input type="file" accept=".csv" onChange={e => { setFile(e.target.files[0]); setMsg(null); }}
+             style={{ fontSize: 13, marginBottom: 14 }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <button className="btn-ghost" style={btnGhost} onClick={() => setShowConfig(!showConfig)}>
+          {showConfig ? "Hide" : "Edit"} configuration</button>
+        <span style={{ color: FAINT, fontSize: 11.5 }}>
+          {file ? `Selected: ${file.name}` : "No file selected"}</span>
+      </div>
+      {showConfig && (
+        <textarea style={{ ...input, fontFamily: mono, minHeight: 300, fontSize: 12 }}
+                  value={config} onChange={e => setConfig(e.target.value)} />)}
+      {msg && <p style={{ fontSize: 12.5, color: msg.ok ? OI_GREEN : OI_VERM }}>{msg.ok ? msg.text : msg.err}</p>}
+      <button style={btn} onClick={start} disabled={busy}>▶ Start run</button>
+    </div>
+  );
+}
+
 // ————————————————————————————— ENGAGEMENTS (list)
-function Engagements({ runs, onSelect, selected, refresh }) {
+function Engagements({ runs, onSelect, selected, refresh, onNew }) {
   return (
     <div style={card}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
                     marginBottom: 8 }}>
         <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
                      color: SLATE, margin: 0 }}>Engagements</h2>
-        <button style={btnGhost} onClick={refresh} className="btn-sm">↻ Refresh</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button style={btnGhost} onClick={refresh}>↻ Refresh</button>
+          {onNew && <button style={btn} onClick={onNew}>+ New</button>}
+        </div>
       </div>
       {runs.length === 0 && <p style={{ color: SLATE, fontSize: 13 }}>No runs yet.</p>}
       {runs.map(r => (
@@ -340,6 +414,7 @@ function BenfordChart({ counts }) {
 // ————————————————————————————— APP (nav shell)
 const PAGES = [
   { id: "engage", label: "Engagements" },
+  { id: "new", label: "New engagement" },
   { id: "monitor", label: "Monitor" },
   { id: "review", label: "Review" },
   { id: "report", label: "Report" },
@@ -353,6 +428,7 @@ function AppInner({ onSignOut }) {
     .catch(() => { sessionStorage.removeItem("jeagent_key"); onSignOut(); });
   if (!runs) refresh();
   const hasRun = !!selected;
+  const opened = (id) => { setSelected(id); setPage("monitor"); };
   return (
     <div style={{ background: PAPER, minHeight: "100vh" }}>
       <div style={{ background: INK, color: "#fff", padding: "14px 0" }}>
@@ -377,11 +453,13 @@ function AppInner({ onSignOut }) {
               {p.label}</button>))}
         </nav>
         {page === "configure" && <Configure />}
-        {(page !== "configure" && !hasRun) && (
-          <Engagements runs={runs || []} selected={selected} onSelect={id => {
-            setSelected(id);
-            if (page === "engage") setPage("monitor");
-          }} refresh={refresh} />)}
+        {page === "new" && <NewEngagement onStarted={opened} />}
+        {(page === "engage" && !hasRun) && (
+          <Engagements runs={runs || []} selected={selected} onSelect={setSelected}
+                       refresh={refresh} onNew={() => setPage("new")} />)}
+        {(page === "engage" && hasRun) && (
+          <Engagements runs={runs || []} selected={selected} onSelect={opened}
+                       refresh={refresh} onNew={() => setPage("new")} />)}
         {hasRun && page === "monitor" && <Monitor runId={selected} />}
         {hasRun && page === "review" && <Review runId={selected} />}
         {hasRun && page === "report" && <Report runId={selected} />}

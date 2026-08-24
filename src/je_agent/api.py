@@ -34,7 +34,7 @@ from .review import (
 from .run_context import RunContext
 from .store import RunStore
 from .universe import select_universe
-from .workspace import RunLock
+from .workspace import RunLock, LockError
 
 app = FastAPI(title="JE Agent API", version="1.0.0",
               description="Journal-entry testing agent — Phase 4 REST surface")
@@ -126,6 +126,52 @@ class StartBody(BaseModel):
     config_yaml: str
 
 
+@app.post("/api/engagements", dependencies=[Depends(require_key)])
+async def create_engagement(
+    config_yaml: str = File(...),
+    extract: UploadFile = File(...),
+):
+    """Create + start an engagement from one multipart request: config YAML + CSV.
+
+    Writes runs/<run_id>/{config.yaml, extract.csv} then launches the pipeline
+    as a detached process (INGEST → … → CROSS_REF). Returns the run_id.
+    """
+    import yaml as _yaml
+
+    try:
+        raw = _yaml.safe_load(config_yaml)
+        from .config import EngagementConfig
+
+        config = EngagementConfig.model_validate(raw)
+    except Exception as e:
+        raise HTTPException(422, f"invalid config: {e}")
+
+    root = _runs_root()
+
+    # Do NOT create run_dir here: the child `jeagent start` guards on
+    # run_dir.exists() and raises if we made it first. Write the config +
+    # extract into an uploads staging area, then let the child create the run.
+    up = root / "_uploads"
+    up.mkdir(parents=True, exist_ok=True)
+    cfg_path = up / f"{config.run_id}.yaml"
+    cfg_path.write_text(config_yaml, encoding="utf-8")
+    extract_path = up / f"{config.run_id}.csv"
+    data = await extract.read()
+    extract_path.write_bytes(data)
+
+    from .workspace import RunLock as _RunLock  # noqa: F401 (child manages lock)
+
+    import subprocess, sys as _sys
+
+    log = open(up / f"{config.run_id}.log", "w", encoding="utf-8")
+    subprocess.Popen(
+        [_sys.executable, "-m", "je_agent.cli", "start",
+         "--config", str(cfg_path), "--extract", str(extract_path),
+         "--runs-dir", str(root)],
+        stdout=log, stderr=subprocess.STDOUT)
+    return {"started": config.run_id, "extract_bytes": len(data)}
+
+
 @app.post("/api/runs/start", dependencies=[Depends(require_key)])
 def start_run(body: StartBody):
     """Persist the YAML, then launch `jeagent start` as a detached process."""
@@ -195,6 +241,13 @@ def run_metrics(run_id: str):
 
     ctx = RunContext(_runs_root() / run_id)
     store = RunStore(ctx.runstore_path)
+    if not ctx.duckdb_path.exists():
+        store.close()
+        return {"run_id": run_id, "status": (store.get_run(run_id) or {}).get("status"),
+                "phase": (store.get_run(run_id) or {}).get("phase"),
+                "population": 0, "flagged_docs": 0, "universe_selected": 0,
+                "rule_counts": {}, "decisions": {"inspect": 0, "accept": 0, "override": 0},
+                "benford": {}}
     con = duckdb.connect(str(ctx.duckdb_path), read_only=True)
     try:
         config = load_config(ctx.dir / "config.yaml")
