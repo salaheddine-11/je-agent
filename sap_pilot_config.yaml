@@ -1,0 +1,48 @@
+run_id: SAPDEMO_2024
+period_end: '2024-12-31'
+materiality:
+  overall: 5000000
+  performance: 3500000
+  currency: MAD
+source:
+  system: sap
+  amount_column: DMBTR
+  currency_column: WAERS
+  column_map:
+    posting_date: BUDAT
+    account: HKONT
+    username: UNAME
+    description: SGTXT
+    source_doc: BELNR
+    entry_ref: BELNR
+    document_date: BLDAT
+    entry_created_date: CPUDT
+  extract_through_date: '2025-01-10'
+risk_context:
+  high_risk_users:
+  - H.AITLA
+  - K.MANSOURI
+  pressures:
+  - year-end closing pressure (ODS clôture entries)
+  fraud_risk_factors:
+  - manual period-end adjustments
+  - multi-currency population
+llm_privacy:
+  mode: zero_retention
+  pii_scrubbing: true
+review:
+  max_universe_size: 200
+  overflow_policy: pause
+  pack_size: 20
+rule_params:
+  period_end_window_days: 7
+  period_end_post_close_days: 15
+  round_number_multiple: 10000
+  round_number_min_amount: 100000
+  doc_posting_gap_days: 5
+  split_window_days: 14
+  split_min_count: 3
+  split_threshold: 2500000
+  unusual_user_rare_threshold: 50
+reviewer:
+  name: jdoe
