@@ -1,22 +1,29 @@
 import { useEffect, useState } from "react";
 import { api, BASE } from "./api";
 
-const INK = "#111827", SLATE = "#4b5563", HAIR = "#e5e7eb", PAPER = "#f6f7f8",
-      CARD = "#fff", AMBER = "#b45309";
+const INK = "#111827", SLATE = "#4b5563", FAINT = "#9ca3af", HAIR = "#e5e7eb",
+      PAPER = "#f6f7f8", CARD = "#fff", AMBER = "#b45309";
+const OI_VERM = "#D55E00", OI_GREEN = "#009E73";
 
-const btn = {
-  background: INK, color: "#fff", border: "none", borderRadius: 7,
-  padding: "9px 18px", fontSize: 13, fontWeight: 650, cursor: "pointer",
-};
-const input = {
-  border: `1px solid ${HAIR}`, borderRadius: 7, padding: "9px 12px",
-  fontSize: 13, width: "100%", boxSizing: "border-box",
-};
-const card = {
-  background: CARD, border: `1px solid ${HAIR}`, borderRadius: 8,
-  padding: 20, marginBottom: 14,
-};
+const btn = { background: INK, color: "#fff", border: "none", borderRadius: 7,
+              padding: "9px 16px", fontSize: 13, fontWeight: 650, cursor: "pointer" };
+const btnGhost = { ...btn, background: "#fff", color: INK, border: `1.2px solid ${INK}` };
+const input = { border: `1px solid ${HAIR}`, borderRadius: 7, padding: "9px 12px",
+                fontSize: 13, width: "100%", boxSizing: "border-box", background: "#fff" };
+const card = { background: CARD, border: `1px solid ${HAIR}`, borderRadius: 8,
+               padding: 20, marginBottom: 14 };
+const label = { fontSize: 10.5, fontWeight: 700, letterSpacing: 1.2,
+                textTransform: "uppercase", color: SLATE, marginBottom: 6, display: "block" };
+const mono = "Consolas, monospace";
 
+function chip(text, opts = {}) {
+  return <span style={{
+    fontSize: 10.5, fontWeight: 700, padding: "2px 10px", borderRadius: 999,
+    ...opts }}>{text}</span>;
+}
+function tup(s) { return typeof s === "string" ? s.toUpperCase() : s; }
+
+// ————————————————————————————— LOGIN
 function Login({ onLogin }) {
   const [key, setKey] = useState("");
   const [err, setErr] = useState("");
@@ -27,125 +34,207 @@ function Login({ onLogin }) {
   }, []);
   const tryKey = async () => {
     sessionStorage.setItem("jeagent_key", key);
-    try {
-      await api.runs();
-      onLogin();
-    } catch (e) {
-      setErr(e.message);
-      sessionStorage.removeItem("jeagent_key");
-    }
+    try { await api.runs(); onLogin(); }
+    catch (e) { setErr(e.message); sessionStorage.removeItem("jeagent_key"); }
   };
   return (
-    <div style={{ maxWidth: 380, margin: "90px auto" }}>
-      <div style={{ fontSize: 11, letterSpacing: 2.4, textTransform: "uppercase",
-                    color: SLATE, marginBottom: 8 }}>
-        JE Agent · ISA 240
-      </div>
-      <h1 style={{ fontSize: 24, margin: "0 0 18px" }}>Sign in</h1>
+    <div style={{ maxWidth: 360, margin: "90px auto" }}>
+      <div style={{ fontSize: 10.5, letterSpacing: 2.6, textTransform: "uppercase",
+                    color: SLATE, marginBottom: 8 }}>JE Agent · ISA 240 / AS 2401</div>
+      <h1 style={{ fontSize: 26, margin: "0 0 20px" }}>Sign in</h1>
       <input style={input} type="password" placeholder="API key"
              value={key} onChange={e => setKey(e.target.value)}
              onKeyDown={e => e.key === "Enter" && tryKey()} />
       {err && <p style={{ color: "#b91c1c", fontSize: 12.5 }}>{err}</p>}
-      <button style={{ ...btn, marginTop: 14, width: "100%" }} onClick={tryKey}>
-        Continue
-      </button>
-      {sso && (
-        <p style={{ color: SLATE, fontSize: 11.5, marginTop: 16 }}>
-          Corporate single sign-on (Microsoft Entra ID) is enabled on this server.
-        </p>
-      )}
+      <button style={{ ...btn, marginTop: 14, width: "100%" }} onClick={tryKey}>Continue</button>
+      {sso && <p style={{ color: SLATE, fontSize: 11.5, marginTop: 14 }}>
+        Corporate single sign-on (Microsoft Entra ID) is enabled on this server.</p>}
     </div>
   );
 }
 
-function RunList({ runs, onSelect, selected }) {
+// ————————————————————————————— CONFIGURE (provider + test connection)
+function Configure() {
+  const [base, setBase] = useState("https://generativelanguage.googleapis.com/v1beta/openai");
+  const [model, setModel] = useState("gemini-3.5-flash-lite");
+  const [key, setKey] = useState("");
+  const [res, setRes] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const test = async () => {
+    setBusy(true); setRes(null);
+    try { setRes({ ok: true, data: await api.testConnection({ base_url: base, model, api_key: key }) }); }
+    catch (e) { setRes({ ok: false, err: e.message }); }
+    setBusy(false);
+  };
   return (
     <div style={card}>
-      <h2 style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 1.2,
-                   color: SLATE, margin: "0 0 12px" }}>Engagements</h2>
+      <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "0 0 16px" }}>Model connection</h2>
+      <p style={{ color: SLATE, fontSize: 12.5, margin: "0 0 16px" }}>
+        Any OpenAI-compatible endpoint: Gemini, Ollama, vLLM, LM Studio, OpenRouter, Azure.
+        Verify credentials before starting a run.</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div><label style={label}>Base URL</label>
+          <input style={input} value={base} onChange={e => setBase(e.target.value)} /></div>
+        <div><label style={label}>Model ID</label>
+          <input style={input} value={model} onChange={e => setModel(e.target.value)} /></div>
+      </div>
+      <div style={{ marginTop: 12 }}><label style={label}>API key</label>
+        <input style={input} type="password" placeholder="(session only)" value={key}
+               onChange={e => setKey(e.target.value)} /></div>
+      <div style={{ marginTop: 16, display: "flex", gap: 10, alignItems: "center" }}>
+        <button style={btn} onClick={test} disabled={busy}>
+          {busy ? "Testing…" : "🔌 Test connection"}</button>
+        {res && res.ok && (
+          <span style={{ fontSize: 12.5, color: OI_GREEN, fontWeight: 650 }}>
+            ✔ {res.data.latency_ms} ms · {res.data.reply} · tools {res.data.tool_support ? "OK" : "n/a"}</span>)}
+        {res && !res.ok && <span style={{ fontSize: 12.5, color: OI_VERM }}>✖ {res.err}</span>}
+      </div>
+    </div>
+  );
+}
+
+// ————————————————————————————— ENGAGEMENTS (list)
+function Engagements({ runs, onSelect, selected, refresh }) {
+  return (
+    <div style={card}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
+                    marginBottom: 8 }}>
+        <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                     color: SLATE, margin: 0 }}>Engagements</h2>
+        <button style={btnGhost} onClick={refresh} className="btn-sm">↻ Refresh</button>
+      </div>
       {runs.length === 0 && <p style={{ color: SLATE, fontSize: 13 }}>No runs yet.</p>}
       {runs.map(r => (
-        <div key={r.run_id} onClick={() => onSelect(r.run_id)}
-             style={{
-               display: "flex", justifyContent: "space-between", padding: "10px 4px",
-               borderBottom: `1px solid ${HAIR}`, cursor: "pointer",
-               background: selected === r.run_id ? PAPER : "transparent",
-               borderRadius: selected === r.run_id ? 6 : 0,
-             }}>
-          <b style={{ fontSize: 13.5 }}>{r.run_id}</b>
-          <span className="chip" style={{
-            fontSize: 10.5, fontWeight: 700, padding: "2px 10px", borderRadius: 999,
+        <div key={r.run_id} onClick={() => onSelect(r.run_id)} style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "11px 6px", borderBottom: `1px solid ${HAIR}`, cursor: "pointer",
+          background: selected === r.run_id ? PAPER : "transparent",
+          borderRadius: selected === r.run_id ? 6 : 0 }}>
+          <div>
+            <b className="mono" style={{ fontSize: 13.5 }}>{r.run_id}</b>
+            <div style={{ fontSize: 11.5, color: SLATE }}>phase {r.phase || "—"}</div>
+          </div>
+          {chip(tup(r.status), {
             background: r.status === "finalized" ? "#fff" : "#fdf3e3",
             color: r.status === "finalized" ? INK : AMBER,
-            border: `1.2px solid ${r.status === "finalized" ? INK : AMBER}`,
-          }}>{r.status}</span>
+            border: `1.2px solid ${r.status === "finalized" ? INK : AMBER}` })}
         </div>
       ))}
     </div>
   );
 }
 
-function RunDetail({ runId }) {
-  const [detail, setDetail] = useState(null);
-  const [universe, setUniverse] = useState(null);
-  const [reviewer, setReviewer] = useState("jdoe");
-  const [msg, setMsg] = useState("");
-
-  const loadAll = async () => {
-    setDetail(await api.runDetail(runId));
-    setUniverse(await api.universe(runId));
-  };
-  if (!detail) loadAll().catch(e => setMsg(e.message));
-
-  const decide = async (ref, decision) => {
-    const reason = prompt(`Reason for ${decision} on ${ref}:`) || "";
-    await api.saveDecisions(runId, reviewer,
-      [{ entry_ref: ref, decision, reason }]);
-    setMsg(`Recorded ${decision} for ${ref} (hash-chained)`);
-    setUniverse(await api.universe(runId));
-  };
-
-  const finalize = async () => {
-    const r = await api.finalize(runId);
-    setMsg(r.finalized
-      ? `✔ Finalized — artifacts: ${r.artifacts.join(", ")}`
-      : `Gates blocked: ${(r.problems || []).join(" | ")}`);
-    setDetail(await api.runDetail(runId));
-  };
-
-  if (!detail) return <div style={card}>Loading…</div>;
-  const decided = universe?.entries.filter(e => e.decision !== "pending") || [];
-  const pending = universe?.entries.filter(e => e.decision === "pending") || [];
-
+// ————————————————————————————— MONITOR (events + metrics)
+function Monitor({ runId }) {
+  const [m, setM] = useState(null);
+  const [d, setD] = useState(null);
+  useEffect(() => {
+    api.metrics(runId).then(setM).catch(() => {});
+    api.runDetail(runId).then(setD).catch(() => {});
+  }, [runId]);
+  if (!m) return <div style={card}>Loading metrics…</div>;
   return (
     <div>
       <div style={card}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ fontSize: 20, margin: 0 }}>{runId}</h1>
-            <span style={{ color: SLATE, fontSize: 12.5 }}>
-              status {detail.status} · phase {detail.phase} · lock{" "}
-              {detail.lock_stale ? "STALE" : detail.locked ? "held" : "free"}
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <input style={{ ...input, width: 120 }} value={reviewer}
-                   onChange={e => setReviewer(e.target.value)} />
-            <button style={btn} onClick={finalize}>🏁 Finalize</button>
-          </div>
+        <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                     color: SLATE, margin: "0 0 12px" }}>Run metrics</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          {[["Lines", m.population], ["Flagged docs", m.flagged_docs],
+            ["Universe", m.universe_selected], ["Status", m.status]].map(([l, v]) => (
+            <div key={l} style={{ padding: 14, background: PAPER, borderRadius: 8 }}>
+              <div style={{ fontSize: 22, fontWeight: 800 }}>{v}</div>
+              <div style={{ fontSize: 10.5, color: SLATE, textTransform: "uppercase",
+                            letterSpacing: 1 }}>{l}</div>
+            </div>))}
         </div>
-        {msg && <p style={{ marginTop: 12, fontSize: 12.5, color: SLATE }}>{msg}</p>}
       </div>
-
       <div style={card}>
-        <h2 style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 1.2,
-                     color: SLATE, margin: "0 0 10px" }}>Review queue</h2>
-        <p style={{ fontSize: 12.5, color: SLATE, margin: "0 0 10px" }}>
-          {decided.length} decided · {pending.length} pending of {universe.selected}
-        </p>
+        <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                     color: SLATE, margin: "0 0 12px" }}>Rule outcomes</h2>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
           <thead><tr style={{ textAlign: "left", color: SLATE, fontSize: 10.5,
-                              textTransform: "uppercase", letterSpacing: 0.6 }}>
+                             textTransform: "uppercase", letterSpacing: 0.6 }}>
+            <th style={{ padding: "7px 9px", borderBottom: `2px solid ${HAIR}` }}>rule</th>
+            <th style={{ padding: "7px 9px", borderBottom: `2px solid ${HAIR}`, textAlign: "right" }}>flags</th>
+            <th style={{ padding: "7px 9px", borderBottom: `2px solid ${HAIR}` }}>share</th>
+          </tr></thead>
+          <tbody>
+            {Object.entries(m.rule_counts).map(([k, v]) => {
+              const pct = m.flagged_docs ? (v / m.flagged_docs * 100).toFixed(1) : 0;
+              return (
+                <tr key={k}>
+                  <td style={{ padding: "7px 9px", borderBottom: `1px solid ${HAIR}`, fontFamily: mono }}>{k}</td>
+                  <td style={{ padding: "7px 9px", borderBottom: `1px solid ${HAIR}`, textAlign: "right",
+                               fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{v.toLocaleString()}</td>
+                  <td style={{ padding: "7px 9px", borderBottom: `1px solid ${HAIR}` }}>
+                    <div style={{ background: HAIR, borderRadius: 4, height: 8, width: "100%" }}>
+                      <div style={{ background: INK, height: 8, borderRadius: 4, width: `${Math.min(100, pct)}%` }} />
+                    </div>
+                  </td>
+                </tr>); })}
+          </tbody>
+        </table>
+      </div>
+      <div style={card}>
+        <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                     color: SLATE, margin: "0 0 12px" }}>Audit events</h2>
+        {(d?.events || []).map((e, i) => (
+          <div key={i} style={{ padding: "6px 0", borderBottom: `1px solid ${HAIR}`,
+                                fontSize: 12.5, display: "flex", gap: 8 }}>
+            <span style={{ color: FAINT, fontFamily: mono, fontSize: 11 }}>
+              {new Date(e.ts).toLocaleString()}</span>
+            <b style={{ color: INK }}>{e.kind}</b>
+            <span style={{ color: SLATE }}>{e.detail}</span>
+          </div>))}
+      </div>
+    </div>
+  );
+}
+
+// ————————————————————————————— REVIEW (queue + decisions)
+function Review({ runId }) {
+  const [u, setU] = useState(null);
+  const [reviewer, setReviewer] = useState("jdoe");
+  const [msg, setMsg] = useState("");
+  const load = () => api.universe(runId).then(setU).catch(e => setMsg(e.message));
+  useEffect(() => { load(); }, [runId]);
+  if (!u) return <div style={card}>Loading review queue…</div>;
+  const decided = u.entries.filter(e => e.decision !== "pending");
+  const pending = u.entries.filter(e => e.decision === "pending");
+  const decide = async (ref, decision) => {
+    const reason = prompt(`Reason for ${decision} on ${ref}:`) || "";
+    if (!reason) return;
+    await api.saveDecisions(runId, reviewer, [{ entry_ref: ref, decision, reason }]);
+    setMsg(`Recorded ${decision} for ${ref} (hash-chained)`);
+    load();
+  };
+  const finalize = async () => {
+    const r = await api.finalize(runId);
+    setMsg(r.finalized ? `✔ Finalized — ${r.artifacts.join(", ")}`
+                       : `Gates blocked: ${(r.problems || []).join(" | ")}`);
+    load();
+  };
+  return (
+    <div>
+      <div style={{ ...card, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                       color: SLATE, margin: 0 }}>Review queue</h2>
+          <p style={{ fontSize: 12.5, color: SLATE, margin: "4px 0 0" }}>
+            {decided.length} decided · {pending.length} pending of {u.selected}</p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input style={{ ...input, width: 120 }} value={reviewer}
+                 onChange={e => setReviewer(e.target.value)} />
+          <button style={btn} onClick={finalize}>🏁 Finalize</button>
+        </div>
+      </div>
+      {msg && <p style={{ fontSize: 12.5, color: SLATE, margin: "0 0 10px" }}>{msg}</p>}
+      <div style={card}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+          <thead><tr style={{ textAlign: "left", color: SLATE, fontSize: 10.5,
+                             textTransform: "uppercase", letterSpacing: 0.6 }}>
             <th style={{ padding: "7px 9px", borderBottom: `2px solid ${HAIR}` }}>entry</th>
             <th style={{ padding: "7px 9px", borderBottom: `2px solid ${HAIR}` }}>rules</th>
             <th style={{ padding: "7px 9px", borderBottom: `2px solid ${HAIR}`, textAlign: "right" }}>amount</th>
@@ -153,106 +242,158 @@ function RunDetail({ runId }) {
             <th></th>
           </tr></thead>
           <tbody>
-            {(universe?.entries || []).slice(0, 50).map(e => (
+            {u.entries.slice(0, 60).map(e => (
               <tr key={e.entry_ref}>
-                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`,
-                             fontFamily: "Consolas, monospace", fontWeight: 700 }}>
+                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`, fontFamily: mono, fontWeight: 700 }}>
                   {e.entry_ref}</td>
+                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}` }}>{e.rules_hit}</td>
+                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`, textAlign: "right",
+                             fontVariantNumeric: "tabular-nums" }}>
+                  {e.abs_amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                 <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}` }}>
-                  {e.rules_hit}</td>
-                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`,
-                             textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                  {e.abs_amount.toLocaleString(undefined,
-                    { maximumFractionDigits: 0 })}</td>
-                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}` }}>
-                  <span className="chip" style={{
-                    fontSize: 10.5, fontWeight: 700, padding: "2px 10px",
-                    borderRadius: 999,
-                    ...(e.decision === "inspect"
-                        ? { background: "#fdf3e3", color: AMBER }
-                        : e.decision === "accept"
-                          ? { background: "#fff", color: SLATE, border: `1.2px solid ${HAIR}` }
-                          : { background: "#eef0f2", color: SLATE }),
-                  }}>{e.decision}</span></td>
-                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`,
-                             whiteSpace: "nowrap" }}>
+                  {chip(e.decision === "pending" ? "pending" : e.decision, {
+                    background: e.decision === "inspect" ? "#fdf3e3" :
+                                e.decision === "accept" ? "#fff" : "#eef0f2",
+                    color: e.decision === "inspect" ? AMBER : SLATE,
+                    border: e.decision === "accept" ? `1.2px solid ${HAIR}` : "none" })}
+                </td>
+                <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`, whiteSpace: "nowrap" }}>
                   {e.decision === "pending" ? (
                     <>
-                      <button style={{ ...btn, padding: "4px 10px", fontSize: 11.5 }}
-                              onClick={() => decide(e.entry_ref, "inspect")}>inspect</button>{" "}
-                      <button style={{
-                        ...btn, padding: "4px 10px", fontSize: 11.5,
-                        background: "#fff", color: INK,
-                        border: `1.2px solid ${INK}`,
-                      }} onClick={() => decide(e.entry_ref, "accept")}>accept</button>
-                    </>
-                  ) : <span style={{ color: SLATE, fontSize: 11.5 }}>✓</span>}
+                      <button onClick={() => decide(e.entry_ref, "inspect")}
+                              style={{ ...btn, padding: "4px 9px", fontSize: 11.5 }}>inspect</button>{" "}
+                      <button onClick={() => decide(e.entry_ref, "accept")}
+                              style={{ ...btnGhost, padding: "4px 9px", fontSize: 11.5 }}>accept</button>
+                    </>) : <span style={{ color: OI_GREEN }}>✓</span>}
                 </td>
-              </tr>
-            ))}
+              </tr>))}
           </tbody>
         </table>
-        {(universe?.entries.length || 0) > 50 && (
-          <p style={{ color: SLATE, fontSize: 11.5, marginTop: 8 }}>
-            Showing first 50 of {universe.entries.length}.</p>
-        )}
-      </div>
-
-      <div style={card}>
-        <h2 style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 1.2,
-                     color: SLATE, margin: "0 0 10px" }}>Deliverables</h2>
-        {["report.pdf", "report.html", "workpaper.xlsx", "flagged_entries.xlsx"].map(n => (
-          <a key={n} href={api.artifactUrl(runId, n)} target="_blank"
-             rel="noreferrer"
-             style={{ display: "block", padding: "8px 0", fontSize: 13,
-                      color: INK, textDecoration: "none",
-                      borderBottom: `1px solid ${HAIR}` }}>
-              ⬇️ {n}</a>
-        ))}
+        {u.entries.length > 60 && <p style={{ color: SLATE, fontSize: 11.5, marginTop: 8 }}>
+          Showing first 60 of {u.entries.length}.</p>}
       </div>
     </div>
   );
 }
 
-export default function App() {
-  const [authed, setAuthed] = useState(!!sessionStorage.getItem("jeagent_key"));
+// ————————————————————————————— REPORT (deliverables + metrics snapshot)
+function Report({ runId }) {
+  const [m, setM] = useState(null);
+  useEffect(() => { api.metrics(runId).then(setM).catch(() => {}); }, [runId]);
+  const arts = ["report.pdf", "report.html", "workpaper.xlsx", "flagged_entries.xlsx"];
+  return (
+    <div>
+      <div style={card}>
+        <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                     color: SLATE, margin: "0 0 14px" }}>Engagement summary</h2>
+        {m && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
+            {[["Lines", m.population], ["Flagged", m.flagged_docs], ["Universe", m.universe_selected],
+              ["Inspect", m.decisions.inspect], ["Benford MAD", m.benford?.mad?.toFixed(4)]].map(([l, v]) => (
+              <div key={l} style={{ padding: 12, background: PAPER, borderRadius: 8 }}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{v ?? "—"}</div>
+                <div style={{ fontSize: 10, color: SLATE, textTransform: "uppercase", letterSpacing: 1 }}>{l}</div>
+              </div>))}
+          </div>)}
+      </div>
+      <div style={card}>
+        <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                     color: SLATE, margin: "0 0 14px" }}>Deliverables</h2>
+        {arts.map(n => (
+          <a key={n} href={api.artifactUrl(runId, n)} target="_blank" rel="noreferrer"
+             style={{ display: "flex", justifyContent: "space-between", padding: "10px 0",
+                      fontSize: 13, color: INK, textDecoration: "none",
+                      borderBottom: `1px solid ${HAIR}` }}>
+            <span>⬇️ {n}</span><span style={{ color: SLATE }}>download</span></a>))}
+      </div>
+      {m?.benford?.mad != null && (
+        <div style={card}>
+          <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
+                       color: SLATE, margin: "0 0 8px" }}>Benford first-digit distribution</h2>
+          <p style={{ fontSize: 12, color: SLATE, margin: "0 0 10px" }}>
+            MAD {m.benford.mad.toFixed(4)} — {m.benford.nigrini_assessment || "—"} (informational, amendment C2).</p>
+          <BenfordChart counts={m.benford.counts} />
+        </div>)}
+    </div>
+  );
+}
+function BenfordChart({ counts }) {
+  const digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const observed = digits.map(d => (counts || {})[Number(d)] || 0);
+  const total = observed.reduce((a, b) => a + b, 0) || 1;
+  const max = Math.max(...observed.map(o => o / total)) || 1;
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 160 }}>
+      {digits.map((d, i) => {
+        const o = observed[i] / total;
+        return (
+          <div key={d} style={{ flex: 1, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: SLATE, marginBottom: 2 }}>
+              {(o * 100).toFixed(1)}%</div>
+            <div style={{ background: INK, height: (o / max) * 110, borderRadius: "3px 3px 0 0" }} />
+            <div style={{ fontSize: 11, fontWeight: 700, marginTop: 4 }}>{d}</div>
+          </div>); })}
+    </div>
+  );
+}
+
+// ————————————————————————————— APP (nav shell)
+const PAGES = [
+  { id: "engage", label: "Engagements" },
+  { id: "monitor", label: "Monitor" },
+  { id: "review", label: "Review" },
+  { id: "report", label: "Report" },
+  { id: "configure", label: "Configure" },
+];
+function AppInner({ onSignOut }) {
   const [runs, setRuns] = useState(null);
   const [selected, setSelected] = useState(null);
-
-  const refresh = () => api.runs().then(r => setRuns(r.runs)).catch(() => {
-    sessionStorage.removeItem("jeagent_key");
-    setAuthed(false);
-  });
-  if (authed && !runs) refresh();
-
-  if (!authed) return <Login onLogin={() => { setAuthed(true); refresh(); }} />;
-
+  const [page, setPage] = useState("engage");
+  const refresh = () => api.runs().then(r => { setRuns(r.runs); return r.runs; })
+    .catch(() => { sessionStorage.removeItem("jeagent_key"); onSignOut(); });
+  if (!runs) refresh();
+  const hasRun = !!selected;
   return (
     <div style={{ background: PAPER, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "26px 22px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between",
-                      alignItems: "flex-end", paddingBottom: 14,
-                      borderBottom: `3px solid ${INK}`, marginBottom: 18 }}>
+      <div style={{ background: INK, color: "#fff", padding: "14px 0" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 22px",
+                      display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.4,
-                          textTransform: "uppercase", color: SLATE }}>
-              Journal Entry Testing · ISA 240 / AS 2401</div>
-            <div style={{ fontSize: 21, fontWeight: 800 }}>JE Agent Console</div>
+            <div style={{ fontSize: 10, letterSpacing: 2.6, textTransform: "uppercase",
+                          color: "#aeb6bf" }}>Journal Entry Testing · ISA 240 / AS 2401</div>
+            <div style={{ fontSize: 19, fontWeight: 800 }}>JE Agent Console</div>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button style={{ ...btn, background: "#fff", color: INK,
-                             border: `1.2px solid ${INK}` }} onClick={refresh}>
-              ↻ Refresh</button>
-            <button style={{ ...btn, background: "#fff", color: SLATE,
-                             border: `1.2px solid ${HAIR}` }}
-                    onClick={() => { sessionStorage.clear(); setAuthed(false); }}>
-              Sign out</button>
-          </div>
+          <button style={{ ...btn, background: "transparent", color: "#fff",
+                           border: `1.2px solid #4b5563` }} onClick={onSignOut}>Sign out</button>
         </div>
-        <RunList runs={runs || []} selected={selected}
-                 onSelect={id => setSelected(id)} />
-        {selected && <RunDetail key={selected} runId={selected} />}
+      </div>
+      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 22px" }}>
+        <nav style={{ display: "flex", gap: 4, borderBottom: `2px solid ${INK}`, marginBottom: 18 }}>
+          {PAGES.map(p => (
+            <button key={p.id} onClick={() => setPage(p.id)} style={{
+              background: "none", border: "none", padding: "12px 16px 10px", cursor: "pointer",
+              fontWeight: 700, fontSize: 13, color: page === p.id ? INK : SLATE,
+              borderBottom: page === p.id ? `3px solid ${AMBER}` : "3px solid transparent" }}>
+              {p.label}</button>))}
+        </nav>
+        {page === "configure" && <Configure />}
+        {(page !== "configure" && !hasRun) && (
+          <Engagements runs={runs || []} selected={selected} onSelect={id => {
+            setSelected(id);
+            if (page === "engage") setPage("monitor");
+          }} refresh={refresh} />)}
+        {hasRun && page === "monitor" && <Monitor runId={selected} />}
+        {hasRun && page === "review" && <Review runId={selected} />}
+        {hasRun && page === "report" && <Report runId={selected} />}
+        {hasRun && page !== "monitor" && page !== "review" && page !== "report" &&
+         page !== "configure" && <Engagements runs={runs || []} selected={selected}
+                              onSelect={setSelected} refresh={refresh} />}
       </div>
     </div>
   );
+}
+export default function App() {
+  const [authed, setAuthed] = useState(!!sessionStorage.getItem("jeagent_key"));
+  if (!authed) return <Login onLogin={() => setAuthed(true)} />;
+  return <AppInner onSignOut={() => { sessionStorage.clear(); setAuthed(false); }} />;
 }

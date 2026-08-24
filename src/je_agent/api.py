@@ -188,6 +188,45 @@ def get_universe(run_id: str):
         con.close()
 
 
+@app.get("/api/runs/{run_id}/metrics", dependencies=[Depends(require_key)])
+def run_metrics(run_id: str):
+    """Aggregated engagement metrics for the Monitor + Report views."""
+    import duckdb
+
+    ctx = RunContext(_runs_root() / run_id)
+    store = RunStore(ctx.runstore_path)
+    con = duckdb.connect(str(ctx.duckdb_path), read_only=True)
+    try:
+        config = load_config(ctx.dir / "config.yaml")
+        from .stats import run_benford
+
+        rule_counts = {}
+        for tool, n in store.con.execute(
+                "SELECT tool, CAST(json_extract(result_json, '$.flagged') AS INT) "
+                "FROM tool_calls WHERE phase='EXECUTE' AND outcome='ok' "
+                "AND result_json IS NOT NULL ORDER BY seq").fetchall():
+            rule_counts[tool] = n
+        population = con.execute("SELECT count(*) FROM journal_lines").fetchone()[0]
+        flagged_docs = con.execute(
+            "SELECT count(DISTINCT entry_ref) FROM xref_ranked").fetchone()[0]
+        ben = run_benford(con, run_id)
+        eff = effective_decisions(store, run_id)
+        dec = {"inspect": 0, "accept": 0, "override": 0}
+        for d in eff.values():
+            dec[d["decision"]] = dec.get(d["decision"], 0) + 1
+        sel = select_universe(con, config)
+        return {
+            "run_id": run_id, "status": (store.get_run(run_id) or {}).get("status"),
+            "phase": (store.get_run(run_id) or {}).get("phase"),
+            "population": population, "flagged_docs": flagged_docs,
+            "universe_selected": sel.selected, "rule_counts": rule_counts,
+            "decisions": dec, "benford": ben,
+        }
+    finally:
+        con.close()
+        store.close()
+
+
 class DecisionsBody(BaseModel):
     reviewer: str
     decisions: list[dict]     # [{entry_ref, decision, reason}]

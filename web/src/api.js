@@ -22,6 +22,7 @@ export const api = {
   health: () => fetch(`${BASE}/health`).then(r => r.json()),
   runs: () => req("/api/runs"),
   runDetail: id => req(`/api/runs/${id}`),
+  metrics: id => req(`/api/runs/${id}/metrics`),
   universe: id => req(`/api/runs/${id}/universe`),
   saveDecisions: (id, reviewer, decisions) =>
     req(`/api/runs/${id}/decisions`, {
