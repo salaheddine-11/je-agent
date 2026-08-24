@@ -45,6 +45,18 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 
+# ---- serve the built web console from this same process (single-port mode) ----
+_WEB_DIST = Path(__file__).resolve().parent.parent.parent / "web" / "dist"
+if _WEB_DIST.exists():
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+
+    app.mount("/assets", StaticFiles(directory=_WEB_DIST / "assets"), name="assets")
+
+    @app.get("/", include_in_schema=False)
+    def _console():
+        return FileResponse(_WEB_DIST / "index.html")
+
 
 def _runs_root() -> Path:
     return Path(os.environ.get("JEAGENT_RUNS_DIR", "runs"))
