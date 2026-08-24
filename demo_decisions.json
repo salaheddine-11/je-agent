@@ -1,0 +1,162 @@
+{
+ "3000000242": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900001168": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000364": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900007250": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000182": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000482": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000591": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900003110": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900000784": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900001217": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000244": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000556": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000013": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000712": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900003043": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900007643": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900004032": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900001082": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000212": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900004187": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900006879": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000429": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900002902": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000348": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000597": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900005190": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000459": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000436": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "3000000675": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900006888": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900005065": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000034": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900001466": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900001889": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000360": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900000976": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000233": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ },
+ "1900003647": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "1900007404": {
+  "decision": "inspect",
+  "reason": "Manual capitalized supplier posting (account 3121/3455 VAT line) ~1.05M MAD, above performance materiality; flagged manual_entries. Vouch to invoice and confirm VAT treatment. Lower risk than the 2.3M acquisition series (no unusual pair, distributed across 5 users) but individually material."
+ },
+ "3000000112": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 posted manually by H.AITLA; ~2.3M MAD, above performance materiality, one of a 20-document series. Vouch to supplier invoice, PO and delivery note; confirm capitalization in the fixed-asset register; collective series evaluation. NOTE: materiality expressed in USD while data is MAD - currency mismatch, scope caveat."
+ }
+}
