@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "./api";
 
 const INK = "#111827", SLATE = "#4b5563", HAIR = "#e5e7eb", PAPER = "#f6f7f8",
@@ -21,10 +21,10 @@ function Login({ onLogin }) {
   const [key, setKey] = useState("");
   const [err, setErr] = useState("");
   const [sso, setSso] = useState(false);
-  useState(() => {
+  useEffect(() => {
     fetch(`${BASE}/health`).then(r => r.json())
       .then(h => setSso(!!h.sso_enabled)).catch(() => {});
-  });
+  }, []);
   const tryKey = async () => {
     sessionStorage.setItem("jeagent_key", key);
     try {
