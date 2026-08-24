@@ -1,0 +1,162 @@
+{
+ "1900007404": {
+  "decision": "accept",
+  "reason": "Routine opex, system-generated (SAP IDoc). Classifier note: IDOC_AUTO matches no configured system-user pattern so is derived manual - configuration observation raised. Vouching sample only."
+ },
+ "3000000242": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900006879": {
+  "decision": "accept",
+  "reason": "Routine opex, system-generated (SAP IDoc). Classifier note: IDOC_AUTO matches no configured system-user pattern so is derived manual - configuration observation raised. Vouching sample only."
+ },
+ "3000000034": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000556": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000233": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900007643": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "1900004187": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000364": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000429": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900005065": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "1900004032": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "1900001217": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000591": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000712": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900001466": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "1900005190": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000459": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900000976": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000212": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900003043": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000436": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000348": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900007250": {
+  "decision": "accept",
+  "reason": "Routine opex, system-generated (SAP IDoc). Classifier note: IDOC_AUTO matches no configured system-user pattern so is derived manual - configuration observation raised. Vouching sample only."
+ },
+ "3000000482": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900001168": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000112": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000675": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000244": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "3000000360": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900003110": {
+  "decision": "accept",
+  "reason": "Routine opex, system-generated (SAP IDoc). Classifier note: IDOC_AUTO matches no configured system-user pattern so is derived manual - configuration observation raised. Vouching sample only."
+ },
+ "1900003647": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "1900002902": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000597": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900001889": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000013": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900000784": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ },
+ "3000000182": {
+  "decision": "inspect",
+  "reason": "Fixed-asset acquisition via unusual pair 23320000/44110000 by high-risk user H.AITLA; ~2M MAD series pattern. Vouch to supplier invoice/PO/delivery note; confirm FA register posting; collective series evaluation applies."
+ },
+ "1900006888": {
+  "decision": "accept",
+  "reason": "Routine opex, system-generated (SAP IDoc). Classifier note: IDOC_AUTO matches no configured system-user pattern so is derived manual - configuration observation raised. Vouching sample only."
+ },
+ "1900001082": {
+  "decision": "inspect",
+  "reason": "Material or undocumented item outside routine patterns - individual substantive testing required."
+ }
+}
