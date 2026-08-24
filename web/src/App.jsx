@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "./api";
+import { api, BASE } from "./api";
 
 const INK = "#111827", SLATE = "#4b5563", HAIR = "#e5e7eb", PAPER = "#f6f7f8",
       CARD = "#fff", AMBER = "#b45309";
