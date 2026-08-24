@@ -1,0 +1,8 @@
+recorded 40 hash-chained decisions as reviewer 'ox-alpha (auditor)'
+decision log integrity: VERIFIED
+gate 1 review completeness        PASS
+gate 2 procedure completeness     PASS
+gate 3 narrative citations        PASS
+gate 4 limitation acceptance      PASS
+✔ FINALIZED — runs_full\DEMO_2026\artifacts\workpaper.xlsx
+EXIT=0

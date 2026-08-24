@@ -1,0 +1,5 @@
+usage: run_real_triage_smoke.py [-h] --config CONFIG --extract EXTRACT
+                                [--runs-dir RUNS_DIR] [--base-url BASE_URL]
+                                [--model MODEL] [--api-key-env API_KEY_ENV]
+run_real_triage_smoke.py: error: unrecognized arguments: --run-id DEMO_2026
+EXIT=2
