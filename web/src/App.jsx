@@ -94,46 +94,115 @@ function Configure() {
   );
 }
 
-const DEFAULT_CONFIG = `run_id: DEMO_2026
-period_end: '2026-06-30'
-materiality: {overall: 250000, performance: 175000, currency: USD}
-source:
-  system: sap
-  amount_column: DMBTR
-  currency_column: WAERS
-  column_map:
-    posting_date: BUDAT
-    account: HKONT
-    username: UNAME
-    description: SGTXT
-    source_doc: BELNR
-    entry_ref: BELNR
-    document_date: BLDAT
-  extract_through_date: '2026-07-10'
-risk_context:
-  high_risk_users: [JSMITH]
-review:
-  max_universe_size: 200
-  overflow_policy: stratify
-  pack_size: 20
-llm_privacy:
-  mode: zero_retention
-  pii_scrubbing: true
-reviewer: {name: jdoe}
-`;
+const field = { ...input, marginBottom: 4 };
+const lgrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 };
 
-// ————————————————————————————— NEW ENGAGEMENT (upload CSV + config, start)
+function ConfigForm({ config, setConfig }) {
+  const set = (k) => (e) => setConfig({ ...config, [k]: e.target.value });
+  const setCol = (k) => (e) => setConfig({
+    ...config,
+    column_map: { ...config.column_map, [k]: e.target.value } });
+  const users = config.high_risk_users.join(", ");
+  return (
+    <div style={{ background: CARD, border: `1px solid ${HAIR}`, borderRadius: 8, padding: 20, marginBottom: 14 }}>
+      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "0 0 14px" }}>Engagement</h3>
+      <div style={lgrid}>
+        <div><label style={label}>Run ID</label>
+          <input style={field} value={config.run_id} onChange={set("run_id")} /></div>
+        <div><label style={label}>Period end</label>
+          <input style={field} type="date" value={config.period_end} onChange={set("period_end")} /></div>
+      </div>
+
+      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "18px 0 14px" }}>Materiality</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 4 }}>
+        <div><label style={label}>Overall</label>
+          <input style={field} type="number" value={config.overall} onChange={set("overall")} /></div>
+        <div><label style={label}>Performance</label>
+          <input style={field} type="number" value={config.performance} onChange={set("performance")} /></div>
+        <div><label style={label}>Currency</label>
+          <input style={field} value={config.currency} onChange={set("currency")} /></div>
+      </div>
+
+      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "18px 0 14px" }}>Source system</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+        <div><label style={label}>System</label>
+          <select style={field} value={config.system} onChange={set("system")}>
+            <option value="sap">SAP</option><option value="oracle">Oracle</option>
+            <option value="generic">Generic</option></select></div>
+        <div><label style={label}>Amount column</label>
+          <input style={field} value={config.amount_column} onChange={set("amount_column")} /></div>
+        <div><label style={label}>Currency column</label>
+          <input style={field} value={config.currency_column} onChange={set("currency_column")} /></div>
+      </div>
+
+      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "18px 0 14px" }}>Column mapping</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+        {[["posting_date", "Posting date"], ["document_date", "Document date"], ["account", "Account"],
+          ["username", "Username"], ["description", "Description"], ["source_doc", "Source doc"],
+          ["entry_ref", "Entry ref"], ["entry_created_date", "Created date"], ["entry_type", "Entry type"]].map(([k, t]) => (
+          <div key={k}><label style={label}>{t}</label>
+            <input style={field} value={config.column_map[k] || ""} onChange={setCol(k)} /></div>))}
+      </div>
+
+      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "18px 0 14px" }}>Risk</h3>
+      <div style={lgrid}>
+        <div><label style={label}>High-risk users (comma separated)</label>
+          <input style={field} value={users}
+                 onChange={e => setConfig({ ...config, high_risk_users:
+                   e.target.value.split(",").map(s => s.trim()).filter(Boolean) })} /></div>
+        <div><label style={label}>Universe size cap</label>
+          <input style={field} type="number" value={config.max_universe_size}
+                 onChange={e => setConfig({ ...config, max_universe_size: +e.target.value })} /></div>
+      </div>
+    </div>
+  );
+}
+
 function NewEngagement({ onStarted }) {
   const [file, setFile] = useState(null);
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
-  const [showConfig, setShowConfig] = useState(false);
+  const [config, setConfig] = useState({
+    run_id: "DEMO_2026", period_end: "2026-06-30",
+    overall: 250000, performance: 175000, currency: "USD",
+    system: "sap", amount_column: "DMBTR", currency_column: "WAERS",
+    column_map: { posting_date: "BUDAT", document_date: "BLDAT", account: "HKONT",
+                  username: "UNAME", description: "SGTXT", source_doc: "BELNR",
+                  entry_ref: "BELNR", entry_created_date: "CPUDT" },
+    high_risk_users: [], max_universe_size: 200,
+  });
+  const yamlOf = () => {
+    const c = config, m = c.column_map;
+    const map = Object.entries(m).filter(([, v]) => v).map(([k, v]) => `    ${k}: ${v}`).join("\n");
+    const users = c.high_risk_users.length ? `\nrisk_context:\n  high_risk_users: [${c.high_risk_users.join(", ")}]` : "";
+    return `run_id: ${c.run_id}
+period_end: '${c.period_end}'
+materiality: {overall: ${c.overall}, performance: ${c.performance}, currency: ${c.currency}}
+source:
+  system: ${c.system}
+  amount_column: ${c.amount_column}
+  currency_column: ${c.currency_column}
+  column_map:
+${map}${users}
+review:
+  max_universe_size: ${c.max_universe_size}
+  overflow_policy: stratify
+  pack_size: 20
+llm_privacy: {mode: zero_retention, pii_scrubbing: true}
+reviewer: {name: jdoe}
+`;
+  };
   const start = async () => {
     if (!file) { setMsg({ ok: false, err: "Choose a CSV extract first." }); return; }
+    if (!config.run_id.trim()) { setMsg({ ok: false, err: "Enter a run ID." }); return; }
     setBusy(true); setMsg(null);
     try {
-      const r = await api.createEngagement(config, file);
+      const r = await api.createEngagement(yamlOf(), file);
       if (r.detail) throw new Error(r.detail);
       setMsg({ ok: true, text: `Started ${r.started} — pipeline running.` });
       onStarted(r.started);
@@ -145,20 +214,16 @@ function NewEngagement({ onStarted }) {
       <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
                    color: SLATE, margin: "0 0 6px" }}>New engagement</h2>
       <p style={{ color: SLATE, fontSize: 12.5, margin: "0 0 18px" }}>
-        Upload a journal-entry extract (CSV) and a configuration YAML. The pipeline
-        stages (ingest → rules → cross-ref → triage) are verified as it runs.</p>
+        Upload a journal-entry extract (CSV) and configure the engagement. The
+        pipeline stages are verified as it runs.</p>
       <label style={label}>Journal-entry extract (CSV)</label>
       <input type="file" accept=".csv" onChange={e => { setFile(e.target.files[0]); setMsg(null); }}
              style={{ fontSize: 13, marginBottom: 14 }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <button className="btn-ghost" style={btnGhost} onClick={() => setShowConfig(!showConfig)}>
-          {showConfig ? "Hide" : "Edit"} configuration</button>
+      <div style={{ marginBottom: 14 }}>
         <span style={{ color: FAINT, fontSize: 11.5 }}>
           {file ? `Selected: ${file.name}` : "No file selected"}</span>
       </div>
-      {showConfig && (
-        <textarea style={{ ...input, fontFamily: mono, minHeight: 300, fontSize: 12 }}
-                  value={config} onChange={e => setConfig(e.target.value)} />)}
+      <ConfigForm config={config} setConfig={setConfig} />
       {msg && <p style={{ fontSize: 12.5, color: msg.ok ? OI_GREEN : OI_VERM }}>{msg.ok ? msg.text : msg.err}</p>}
       <button style={btn} onClick={start} disabled={busy}>▶ Start run</button>
     </div>
