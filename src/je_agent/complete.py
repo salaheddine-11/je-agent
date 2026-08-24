@@ -68,6 +68,27 @@ def complete_run(run_dir: Path, accept_limitations: bool = True) -> dict:
         else:
             report["triage"] = {"covered": "already present"}
 
+        # 1b) AI reviewer — if review.mode == "ai" and decisions are missing,
+        # derive them from the triage so the run needs no human review step.
+        from .review import effective_decisions
+
+        eff = effective_decisions(store, config.run_id)
+        if config.review.mode == "ai":
+            from .ai_review import run_ai_review
+            from .schemas import TriageReport as _TR
+
+            triage = None
+            if triage_path.exists():
+                triage = _TR.model_validate_json(triage_path.read_text(encoding="utf-8"))
+            missing = [e["entry_ref"] for e in universe.entries if e["entry_ref"] not in eff]
+            if triage is not None and missing:
+                res = run_ai_review(store, config, universe, triage)
+                store.record_event(config.run_id, "review",
+                                   f"ai-reviewer recorded {res['recorded']} "
+                                   f"({res['bypasses']} confidence bypasses)")
+                report["ai_review"] = {"recorded": res["recorded"], "bypasses": res["bypasses"]}
+                eff = effective_decisions(store, config.run_id)
+
         # 2) run_narrate if not already present (feeds facts + triage summary)
         narrative_path = ctx.llm_dir / "narrative.json"
         if not narrative_path.exists():

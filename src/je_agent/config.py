@@ -128,6 +128,9 @@ class Review(BaseModel):
     fallback_top_n_per_currency: int = Field(default=20, gt=0)
     force_include_currencies: list[str] = Field(default_factory=list)      # v1.5 Y8
     minimum_entries_per_currency: int = Field(default=0, ge=0)             # v1.5 Y8
+    mode: Literal["human", "ai"] = "human"                                 # Feature 2: AI reviewer
+    ai_min_confidence: float = Field(default=0.6, ge=0.0, le=1.0)          # accept only above this
+    ai_default_decision: Literal["inspect", "accept"] = "inspect"          # when confidence < threshold
 
 
 class RuleParams(BaseModel):
