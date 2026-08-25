@@ -1,0 +1,25 @@
+- Preflight checks.
+✔ Preflight checks.
+- Verifying framework.
+✔ Verifying framework. Found Vite.
+- Validating Tailwind CSS. Found v4.
+✔ Validating Tailwind CSS. Found v4.
+- Validating import alias.
+✔ Validating import alias.
+- Writing components.json.
+✔ Writing components.json.
+- Checking registry.
+✔ Checking registry.
+- Installing dependencies.
+- Installing dependencies.
+✔ Installing dependencies.
+- Updating files.
+✔ Created 1 file:
+  - src\lib\utils.js
+- Updating src\index.css
+✔ Updating src\index.css
+
+Project initialization completed.
+You may now add components.
+
+EXIT=0

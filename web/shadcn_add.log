@@ -1,0 +1,19 @@
+- Checking registry.
+✔ Checking registry.
+- Installing dependencies.
+- Installing dependencies.
+✔ Installing dependencies.
+- Updating files.
+✔ Created 11 files:
+  - src\components\ui\button.jsx
+  - src\components\ui\card.jsx
+  - src\components\ui\badge.jsx
+  - src\components\ui\input.jsx
+  - src\components\ui\label.jsx
+  - src\components\ui\select.jsx
+  - src\components\ui\table.jsx
+  - src\components\ui\separator.jsx
+  - src\components\ui\sonner.jsx
+  - src\components\ui\tabs.jsx
+  - src\components\ui\dialog.jsx
+EXIT=0
