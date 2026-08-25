@@ -1,4 +1,8 @@
 /* JE Agent console — explicit light theme (no auto dark-mode inversion). */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
 :root {
   --text: #4b5563;
   --text-h: #111827;

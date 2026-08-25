@@ -96,10 +96,20 @@ def list_runs():
         if not rs.exists():
             continue
         store = RunStore(rs)
+        pop = 0
         try:
+            import duckdb as _db
+            wp = d / "workspace.duckdb"
+            if wp.exists():
+                _con = _db.connect(str(wp), read_only=True)
+                pop = _con.execute("SELECT count(*) FROM journal_lines").fetchone()[0]
+                _con.close()
             info = store.get_run(d.name) or {}
             runs.append({"run_id": d.name, "status": info.get("status"),
-                         "phase": info.get("phase")})
+                         "phase": info.get("phase"), "population": pop})
+        except Exception:
+            runs.append({"run_id": d.name, "status": None, "phase": None,
+                         "population": 0})
         finally:
             store.close()
     return {"runs": runs}

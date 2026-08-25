@@ -287,7 +287,7 @@ reviewer: {name: jdoe}
 }
 
 // ————————————————————————————— ENGAGEMENTS (list)
-function Engagements({ runs, onSelect, selected, refresh, onNew }) {
+function Engagements({ runs, runsLoading, onSelect, selected, refresh, onNew }) {
   return (
     <div style={card}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -299,7 +299,27 @@ function Engagements({ runs, onSelect, selected, refresh, onNew }) {
           {onNew && <button style={btn} onClick={onNew}>+ New</button>}
         </div>
       </div>
-      {runs.length === 0 && <p style={{ color: SLATE, fontSize: 13 }}>No runs yet.</p>}
+      {runsLoading && (
+        <div>
+          {[16, 16, 16].map((h, i) => (
+            <div key={i} style={{ height: h, background: "#eceef0", borderRadius: 6,
+                                  margin: "10px 0", animation: "pulse 1.2s ease-in-out infinite" }} />))}
+        </div>)}
+      {!runsLoading && runs.length === 0 && <p style={{ color: SLATE, fontSize: 13 }}>No runs yet.</p>}
+      {!runsLoading && runs.length > 0 && (() => {
+        const finalized = runs.filter(r => r.status === "finalized").length;
+        const awaiting = runs.filter(r => r.status === "awaiting_review").length;
+        const lines = runs.reduce((s, r) => s + (r.population || 0), 0);
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 14 }}>
+            {[["Engagements", runs.length], ["Finalized", finalized],
+              ["Awaiting review", awaiting], ["Lines analyzed", lines.toLocaleString()]].map(([l, v]) => (
+              <div key={l} style={{ padding: 14, background: PAPER, borderRadius: 8 }}>
+                <div style={{ fontSize: 22, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{v}</div>
+                <div style={{ fontSize: 10.5, color: SLATE, textTransform: "uppercase", letterSpacing: 1 }}>{l}</div>
+              </div>))}
+          </div>);
+      })()}
       {runs.map(r => (
         <div key={r.run_id} onClick={() => onSelect(r.run_id)} style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -631,11 +651,13 @@ const PAGES = [
 ];
 function AppInner({ onSignOut }) {
   const [runs, setRuns] = useState(null);
+  const [runsLoading, setRunsLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [page, setPage] = useState("engage");
-  const refresh = () => api.runs().then(r => { setRuns(r.runs); return r.runs; })
-    .catch(() => { sessionStorage.removeItem("jeagent_key"); onSignOut(); });
-  if (!runs) refresh();
+  const refresh = () => { setRunsLoading(true);
+    return api.runs().then(r => { setRuns(r.runs); setRunsLoading(false); return r.runs; })
+    .catch(() => { setRunsLoading(false); sessionStorage.removeItem("jeagent_key"); onSignOut(); }); };
+  useEffect(() => { if (!runs) refresh(); }, []);   // initial fetch once, never during render
   const hasRun = !!selected;
   const opened = (id) => { setSelected(id); setPage("monitor"); };
   return (
@@ -664,11 +686,11 @@ function AppInner({ onSignOut }) {
         {page === "configure" && <Configure />}
         {page === "new" && <NewEngagement onStarted={opened} />}
         {(page === "engage" && !hasRun) && (
-          <Engagements runs={runs || []} selected={selected} onSelect={setSelected}
-                       refresh={refresh} onNew={() => setPage("new")} />)}
+          <Engagements runs={runs || []} runsLoading={runsLoading} selected={selected}
+                       onSelect={setSelected} refresh={refresh} onNew={() => setPage("new")} />)}
         {(page === "engage" && hasRun) && (
-          <Engagements runs={runs || []} selected={selected} onSelect={opened}
-                       refresh={refresh} onNew={() => setPage("new")} />)}
+          <Engagements runs={runs || []} runsLoading={runsLoading} selected={selected}
+                       onSelect={opened} refresh={refresh} onNew={() => setPage("new")} />)}
         {hasRun && page === "monitor" && <Monitor runId={selected} />}
         {hasRun && page === "review" && <Review runId={selected} />}
         {hasRun && page === "report" && <Report runId={selected} />}
