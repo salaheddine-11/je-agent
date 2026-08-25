@@ -7,7 +7,7 @@ source:
   currency_column: CUR
   column_map:
     posting_date: DATE
-    document_date: DATE
+    document_date: DOCDAT
     account: ACCT
     username: USER
     description: DESC
@@ -19,6 +19,8 @@ review:
   max_universe_size: 2000
   overflow_policy: stratify
   pack_size: 20
+risk_context:
+  high_risk_users: [SAP_JOB]
 llm_privacy: {mode: zero_retention, pii_scrubbing: true}
 report_lang: {lang: en}
 provider:

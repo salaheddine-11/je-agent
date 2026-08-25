@@ -1,61 +1,89 @@
 {
- "lines": 2092,
+ "lines": 2106,
  "base_docs": 1000,
- "injections": 46,
+ "injections": 53,
  "det": {
-  "canonical_rows": 2092,
+  "canonical_rows": 2106,
   "rejected": 0,
   "rule_counts": {
-   "manual_entries": 2092,
-   "period_end": 20,
-   "round_amounts": 12,
-   "date_divergence": 14,
-   "entry_splitting": 54,
+   "manual_entries": 1886,
+   "period_end": 24,
+   "round_amounts": 14,
+   "date_divergence": 22,
+   "entry_splitting": 39,
    "balance_check": 3,
-   "unusual_users": 8,
-   "unusual_pairs": 1046,
+   "unusual_users": 20,
+   "unusual_pairs": 11,
    "reversals": 12,
-   "high_risk_system_pairs": 0
+   "high_risk_system_pairs": 10
   },
-  "universe_selected": 7,
-  "universe_total_flagged": 1046,
+  "universe_selected": 26,
+  "universe_total_flagged": 946,
+  "universe_refs": [
+   "A10003",
+   "A10016",
+   "A10002",
+   "A10018",
+   "A10017",
+   "A10015",
+   "A10019",
+   "B0000193",
+   "B0000165",
+   "B0000765",
+   "B0000470",
+   "B0000592",
+   "B0000603",
+   "B0000393",
+   "B0000314",
+   "B0000925",
+   "B0000216",
+   "B0000982",
+   "B0000911",
+   "B0000059",
+   "B0000191",
+   "B0000378",
+   "B0000683",
+   "B0000316",
+   "B0000913",
+   "B0000796"
+  ],
   "workspace": "C:\\Users\\salah eddine\\Desktop\\je-agent\\stress_output\\run-small\\STRESS_STRESS-SMALL\\workspace.duckdb"
  },
  "score": {
   "per_rule": {
    "round_amounts": {
     "injected": 6,
-    "flagged": 6,
+    "flagged": 7,
     "tp": 6,
     "fn": 0,
-    "fp_clean": 0,
-    "precision": 1.0,
+    "fp_clean": 1,
+    "precision": 0.8571,
     "recall": 1.0,
-    "f1": 1.0
+    "f1": 0.9231
    },
    "entry_splitting": {
     "injected": 18,
-    "flagged": 32,
+    "flagged": 20,
     "tp": 18,
     "fn": 0,
-    "fp_clean": 0,
-    "precision": 1.0,
+    "fp_clean": 2,
+    "precision": 0.9,
     "recall": 1.0,
-    "f1": 1.0
+    "f1": 0.9474
    },
    "period_end": {
     "injected": 4,
-    "flagged": 10,
+    "flagged": 12,
     "tp": 4,
     "fn": 0,
-    "fp_clean": 0,
-    "precision": 1.0,
+    "fp_clean": 4,
+    "precision": 0.5,
     "recall": 1.0,
-    "f1": 1.0
+    "f1": 0.6667
    },
    "unusual_pairs": {
     "injected": 5,
-    "flagged": 1046,
+    "flagged": 11,
     "tp": 5,
     "fn": 0,
     "fp_clean": 0,
@@ -65,13 +93,13 @@
    },
    "unusual_users": {
     "injected": 4,
-    "flagged": 4,
+    "flagged": 10,
     "tp": 4,
     "fn": 0,
-    "fp_clean": 0,
-    "precision": 1.0,
+    "fp_clean": 6,
+    "precision": 0.4,
     "recall": 1.0,
-    "f1": 1.0
+    "f1": 0.5714
    },
    "balance_check": {
     "injected": 3,
@@ -92,17 +120,43 @@
     "precision": 1.0,
     "recall": 1.0,
     "f1": 1.0
+   },
+   "date_divergence": {
+    "injected": 4,
+    "flagged": 11,
+    "tp": 4,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "high_risk_system_pairs": {
+    "injected": 3,
+    "flagged": 10,
+    "tp": 3,
+    "fn": 0,
+    "fp_clean": 7,
+    "precision": 0.3,
+    "recall": 1.0,
+    "f1": 0.4615
    }
   },
   "aggregate": {
-   "injected": 46,
-   "flagged": 1046,
-   "tp": 46,
+   "injected": 53,
+   "flagged": 72,
+   "tp": 53,
    "fn": 0,
-   "fp": 1000,
-   "precision": 0.044,
+   "fp": 19,
+   "precision": 0.7361,
    "recall": 1.0,
-   "f1": 0.0842
+   "f1": 0.848
+  },
+  "universe": {
+   "selected": 26,
+   "above_pm_injected": 7,
+   "injected_in_universe": 7,
+   "universe_recall": 1.0
   }
  }
 }

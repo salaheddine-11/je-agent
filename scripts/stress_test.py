@@ -41,17 +41,22 @@ from stress_gen import Scenario, build_scenario, write_csv  # noqa: E402
 
 OUT = ROOT / "stress_output"
 ANOMALY_RULES = ["round_amounts", "entry_splitting", "period_end", "unusual_pairs",
-                 "unusual_users", "balance_check", "reversals"]
+                 "unusual_users", "balance_check", "reversals",
+                 "date_divergence", "high_risk_system_pairs"]
 
 SCENARIOS = {
     "small":  {"n_docs": 1_000,  "seed": 1101,  "anom": {"round_amounts": 6, "entry_splitting": 5,
-               "period_end": 4, "unusual_pairs": 5, "unusual_users": 4, "balance_check": 3, "reversals": 3}},
+               "period_end": 4, "unusual_pairs": 5, "unusual_users": 4, "balance_check": 3,
+               "reversals": 3, "date_divergence": 4, "high_risk_system_pairs": 3}},
     "medium": {"n_docs": 10_000, "seed": 2202,  "anom": {"round_amounts": 12, "entry_splitting": 10,
-               "period_end": 8, "unusual_pairs": 10, "unusual_users": 8, "balance_check": 6, "reversals": 6}},
+               "period_end": 8, "unusual_pairs": 10, "unusual_users": 8, "balance_check": 6,
+               "reversals": 6, "date_divergence": 8, "high_risk_system_pairs": 6}},
     "large":  {"n_docs": 50_000, "seed": 3303,  "anom": {"round_amounts": 20, "entry_splitting": 16,
-               "period_end": 12, "unusual_pairs": 18, "unusual_users": 12, "balance_check": 10, "reversals": 12}},
+               "period_end": 12, "unusual_pairs": 18, "unusual_users": 12, "balance_check": 10,
+               "reversals": 12, "date_divergence": 16, "high_risk_system_pairs": 10}},
     "huge":   {"n_docs": 100_000, "seed": 4404, "anom": {"round_amounts": 30, "entry_splitting": 24,
-               "period_end": 18, "unusual_pairs": 26, "unusual_users": 18, "balance_check": 15, "reversals": 20}},
+               "period_end": 18, "unusual_pairs": 26, "unusual_users": 18, "balance_check": 15,
+               "reversals": 20, "date_divergence": 30, "high_risk_system_pairs": 18}},
 }
 
 
@@ -65,7 +70,7 @@ source:
   currency_column: CUR
   column_map:
     posting_date: DATE
-    document_date: DATE
+    document_date: DOCDAT
     account: ACCT
     username: USER
     description: DESC
@@ -77,6 +82,8 @@ review:
   max_universe_size: 2000
   overflow_policy: stratify
   pack_size: 20
+risk_context:
+  high_risk_users: [SAP_JOB]
 llm_privacy: {{mode: zero_retention, pii_scrubbing: true}}
 report_lang: {{lang: en}}
 provider:
@@ -84,6 +91,20 @@ provider:
   model: {os.environ.get('PILOT_MODEL', 'gemini-3.5-flash-lite')}
 reviewer: {{name: stress-test}}
 """
+
+
+def _anomaly_amount(scenario: Scenario, ref: str) -> float | None:
+    """Max |amount| of an injected doc ref (from the generated CSV lines)."""
+    best = None
+    for line in scenario.lines[1:]:
+        parts = line.split(",")
+        if parts[0] == ref:
+            try:
+                amt = abs(float(parts[8]))
+                best = amt if best is None else max(best, amt)
+            except (ValueError, IndexError):
+                pass
+    return best
 
 
 def run_deterministic(scenario: Scenario, out_dir: Path) -> dict:
@@ -116,10 +137,11 @@ def run_deterministic(scenario: Scenario, out_dir: Path) -> dict:
     return {"canonical_rows": rep.canonical_rows, "rejected": rep.rejected_rows,
             "rule_counts": rule_counts, "universe_selected": sel.selected,
             "universe_total_flagged": sel.total_flagged,
+            "universe_refs": [e["entry_ref"] for e in sel.entries],
             "workspace": str(ctx.duckdb_path)}
 
 
-def score(scenario: Scenario, det: dict, run_dir: Path) -> dict:
+def score(scenario: Scenario, det: dict, run_dir: Path, config) -> dict:
     """Compare flagged (per rule) vs injected anomalies: precision/recall/F1."""
     con = duckdb.connect(str(det["workspace"]), read_only=True)
     flagged = {}
@@ -137,9 +159,8 @@ def score(scenario: Scenario, det: dict, run_dir: Path) -> dict:
         tp = len(injected_in_rule & flagged_in_rule)
         fn = len(injected_in_rule - flagged_in_rule)
         # FP only counts flags on CLEAN base docs (not injections of other rules)
-        clean = {r[0] for r in scenario.lines[1:] if r[0].startswith("B")}
-        fp_clean = len(flagged_in_rule & clean) - len(flagged_in_rule & injected_in_rule)
-        fp_clean = max(fp_clean, 0)
+        clean = {r.split(",")[0] for r in scenario.lines[1:] if r.split(",")[0].startswith("B")}
+        fp_clean = len(flagged_in_rule & clean)
         precision = tp / (tp + fp_clean) if (tp + fp_clean) else 1.0
         recall = tp / (tp + fn) if (tp + fn) else 1.0
         f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 1.0
@@ -160,11 +181,32 @@ def score(scenario: Scenario, det: dict, run_dir: Path) -> dict:
     recall = tp_all / (tp_all + fn_all) if (tp_all + fn_all) else 1.0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 1.0
 
+    # ---- what the REVIEWER actually sees (the universe) --------------------
+    # Design: universe = flagged entries above performance materiality (PM).
+    # Sub-PM anomalies are out of scope BY DESIGN — so the meaningful universe
+    # recall is measured only over injections whose amount >= PM.
+    pm = config.materiality.performance
+    injected_in_univ = 0
+    universe_eligible = 0
+    univ = set(det["universe_refs"])
+    for ref in all_injected:
+        amt = _anomaly_amount(scenario, ref)
+        if amt is None or amt < pm:
+            continue
+        universe_eligible += 1
+        if ref in univ:
+            injected_in_univ += 1
+    univ_recall = injected_in_univ / universe_eligible if universe_eligible else 1.0
+
     return {"per_rule": per_rule,
             "aggregate": {"injected": len(all_injected), "flagged": len(all_flagged),
                           "tp": tp_all, "fn": fn_all, "fp": fp_all,
                           "precision": round(precision, 4), "recall": round(recall, 4),
-                          "f1": round(f1, 4)}}
+                          "f1": round(f1, 4)},
+            "universe": {"selected": len(univ),
+                         "above_pm_injected": universe_eligible,
+                         "injected_in_universe": injected_in_univ,
+                         "universe_recall": round(univ_recall, 4)}}
 
 
 def main() -> int:
@@ -191,6 +233,8 @@ def main() -> int:
         print(f"\n=== {name}: {n_lines:,} lines ({sc.n_base_docs:,} base docs, "
               f"{len(sc.anomalies)} injections) ===")
 
+        config = load_config(run_dir / "config.yaml")
+
         t0 = time.time()
         det = run_deterministic(sc, run_dir)
         print(f"  ingest {det['canonical_rows']:,} rows ({det['rejected']} rejected) — "
@@ -198,10 +242,11 @@ def main() -> int:
         print("  rule flags: " + ", ".join(f"{k}={v}" for k, v in det["rule_counts"].items()))
 
         t0 = time.time()
-        s = score(sc, det, run_dir)
+        s = score(sc, det, run_dir, config)
         print(f"  scored in {time.time() - t0:.1f}s — aggregate "
               f"precision={s['aggregate']['precision']} recall={s['aggregate']['recall']} "
-              f"f1={s['aggregate']['f1']}")
+              f"f1={s['aggregate']['f1']} | universe_recall={s['universe']['universe_recall']} "
+              f"({s['universe']['injected_in_universe']}/{s['aggregate']['injected']} injected make the universe)")
 
         per_rule_lines = []
         for rule, m in s["per_rule"].items():
@@ -225,27 +270,49 @@ def main() -> int:
         "# JE Agent — Stress-Test Results (labeled anomalies)",
         "",
         f"Generated {time.strftime('%Y-%m-%d %H:%M')} · total run time {total:.1f}s · "
-        "deterministic rules (LLM triage leg optional, `--skip-triage` not used if you ran with it).",
+        "deterministic rules (LLM triage leg separate).",
         "",
-        "Method: synthetic journal populations with **known injected anomalies** "
-        "(round amounts, split-below-materiality invoices, period-end postings, unusual "
-        "account pairs, rare users, unbalanced docs, reversals). Every injected document "
-        "carries its label; each rule is scored against it.",
+        "## Methodology (v2)",
+        "",
+        "Synthetic journal populations with **known injected anomalies**, one labeled "
+        "document per case, covering all 10 rules. Base populations are **realistic, not "
+        "sterile**: ~90% manual + ~10% system-posted entries (IDOC_AUTO / WF-BATCH / "
+        "SAP_JOB), legit-rare users (~5%), legitimately large invoices, month-start "
+        "postings — so false positives CAN occur and are measured.",
+        "",
+        "**Scoring** — for each rule: `tp` = injected anomalies flagged, `fn` = injected "
+        "missed, `fp` = flags on clean base docs (the noise). Recall = tp/(tp+fn); "
+        "precision = tp/(tp+fp); F1 = harmonic mean. Out-of-scope injections (below "
+        "performance materiality, excluded by design) are excluded from universe recall.",
+        "",
+        "**Rules injected:** round_amounts, entry_splitting, period_end, unusual_pairs, "
+        "unusual_users, balance_check, reversals, date_divergence, high_risk_system_pairs, "
+        "manual_entries (implicit — everything is a journal entry).",
         "",
         "## Aggregate",
         "",
-        "| Scenario | Lines | Injections | Recall | Precision | F1 |",
-        "|---|---|---|---|---|---|",
+        "| Scenario | Lines | Injections | Recall | Precision | F1 | Universe recall (PM-scoped) |",
+        "|---|---|---|---|---|---|---|",
     ]
     for name, r in all_results.items():
+        u = r["score"]["universe"]
         note_lines.append(f"| {name} | {r['lines']:,} | {r['injections']} | "
                           f"{r['score']['aggregate']['recall']:.2%} | "
                           f"{r['score']['aggregate']['precision']:.2%} | "
-                          f"{r['score']['aggregate']['f1']:.2%} |")
+                          f"{r['score']['aggregate']['f1']:.2%} | "
+                          f"{u['universe_recall']:.2%} "
+                          f"({u['injected_in_universe']}/{u['above_pm_injected']} above-PM) |")
     for name, r in all_results.items():
         note_lines.append(f"## {name} ({r['lines']:,} lines)")
-        for line in per_rule_lines if name == list(all_results)[0] else _rule_lines(r):
-            note_lines.append(line)
+        for rule, m in r["score"]["per_rule"].items():
+            note_lines.append(f"- {rule}: recall {m['recall']:.2%}, precision "
+                              f"{m['precision']:.2%}, F1 {m['f1']:.2%} "
+                              f"({m['tp']}/{m['injected']} caught, {m['fp_clean']} false positives)")
+        u = r["score"]["universe"]
+        note_lines.append(f"- universe: {u['selected']} selected of "
+                          f"{len(r['det'].get('universe_refs', []))} refs; "
+                          f"{u['injected_in_universe']}/{u['above_pm_injected']} above-PM "
+                          f"injected anomalies in universe (recall {u['universe_recall']:.2%})")
         note_lines.append("")
     (OUT / "notes.md").write_text("\n".join(note_lines), encoding="utf-8")
 

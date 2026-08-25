@@ -1,0 +1,40 @@
+
+=== medium: 20,186 lines (10,000 base docs, 93 injections) ===
+  ingest 20,186 rows (0 rejected) — 4.0s
+  rule flags: manual_entries=20186, period_end=96, round_amounts=46, date_divergence=28, entry_splitting=486, balance_check=6, unusual_users=16, unusual_pairs=10093, reversals=24, high_risk_system_pairs=0
+  scored in 0.2s — aggregate precision=0.0092 recall=1.0 f1=0.0183
+    ✓ round_amounts      recall=100.00% precision=100.00% f1=100.00% (12/12 injected, 0 fp on clean)
+    ✓ entry_splitting    recall=100.00% precision=100.00% f1=100.00% (37/37 injected, 0 fp on clean)
+    ✓ period_end         recall=100.00% precision=100.00% f1=100.00% (8/8 injected, 0 fp on clean)
+    ✓ unusual_pairs      recall=100.00% precision=100.00% f1=100.00% (10/10 injected, 0 fp on clean)
+    ✓ unusual_users      recall=100.00% precision=100.00% f1=100.00% (8/8 injected, 0 fp on clean)
+    ✓ balance_check      recall=100.00% precision=100.00% f1=100.00% (6/6 injected, 0 fp on clean)
+    ✓ reversals          recall=100.00% precision=100.00% f1=100.00% (12/12 injected, 0 fp on clean)
+
+=== large: 100,302 lines (50,000 base docs, 151 injections) ===
+  ingest 100,302 rows (0 rejected) — 8.8s
+  rule flags: manual_entries=100302, period_end=414, round_amounts=118, date_divergence=48, entry_splitting=2566, balance_check=10, unusual_users=24, unusual_pairs=50151, reversals=48, high_risk_system_pairs=0
+  scored in 0.6s — aggregate precision=0.003 recall=1.0 f1=0.006
+    ✓ round_amounts      recall=100.00% precision=100.00% f1=100.00% (20/20 injected, 0 fp on clean)
+    ✓ entry_splitting    recall=100.00% precision=100.00% f1=100.00% (55/55 injected, 0 fp on clean)
+    ✓ period_end         recall=100.00% precision=100.00% f1=100.00% (12/12 injected, 0 fp on clean)
+    ✓ unusual_pairs      recall=100.00% precision=100.00% f1=100.00% (18/18 injected, 0 fp on clean)
+    ✓ unusual_users      recall=100.00% precision=100.00% f1=100.00% (12/12 injected, 0 fp on clean)
+    ✓ balance_check      recall=100.00% precision=100.00% f1=100.00% (10/10 injected, 0 fp on clean)
+    ✓ reversals          recall=100.00% precision=100.00% f1=100.00% (24/24 injected, 0 fp on clean)
+
+=== huge: 200,466 lines (100,000 base docs, 233 injections) ===
+  ingest 200,466 rows (0 rejected) — 15.8s
+  rule flags: manual_entries=200466, period_end=764, round_amounts=216, date_divergence=76, entry_splitting=4856, balance_check=15, unusual_users=36, unusual_pairs=100233, reversals=80, high_risk_system_pairs=0
+  scored in 1.8s — aggregate precision=0.0023 recall=1.0 f1=0.0046
+    ✓ round_amounts      recall=100.00% precision=100.00% f1=100.00% (30/30 injected, 0 fp on clean)
+    ✓ entry_splitting    recall=100.00% precision=100.00% f1=100.00% (86/86 injected, 0 fp on clean)
+    ✓ period_end         recall=100.00% precision=100.00% f1=100.00% (18/18 injected, 0 fp on clean)
+    ✓ unusual_pairs      recall=100.00% precision=100.00% f1=100.00% (26/26 injected, 0 fp on clean)
+    ✓ unusual_users      recall=100.00% precision=100.00% f1=100.00% (18/18 injected, 0 fp on clean)
+    ✓ balance_check      recall=100.00% precision=100.00% f1=100.00% (15/15 injected, 0 fp on clean)
+    ✓ reversals          recall=100.00% precision=100.00% f1=100.00% (40/40 injected, 0 fp on clean)
+
+💾 results: C:\Users\salah eddine\Desktop\je-agent\stress_output\results.json
+💾 notes: C:\Users\salah eddine\Desktop\je-agent\stress_output\notes.md
+EXIT=0
