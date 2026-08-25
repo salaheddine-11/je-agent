@@ -218,5 +218,35 @@ def _print_universe_table(runs_dir: Path, run_id: str) -> None:
         con.close()
 
 
+@app.command()
+def serve(
+    port: int = typer.Option(8300, "--port", "-p", help="Console port"),
+    api_key: str = typer.Option(None, "--key", "-k",
+        help="Login key (default: env JEAGENT_API_KEYS, else 'jeagent')"),
+    runs_dir: Path = typer.Option(Path("runs"), "--runs-dir", "-r"),
+    model: str = typer.Option("gemini-3.5-flash-lite", "--model", "-m",
+        help="LLM model for triage/narration"),
+):
+    """Launch the JE Agent console (single command — no env vars needed)."""
+    import os
+
+    # Key precedence: --key > JEAGENT_API_KEYS > default
+    key = api_key or os.environ.get("JEAGENT_API_KEYS") or "jeagent"
+
+    import uvicorn
+    from je_agent.api import app as fastapi_app
+
+    os.environ.setdefault("JEAGENT_API_KEYS", key)
+    os.environ.setdefault("JEAGENT_RUNS_DIR", str(runs_dir))
+
+    console.print(f"[bold green]JE Agent console[/] — [bold]http://localhost:{port}[/]")
+    console.print(f"  login key : [bold]{key}[/]")
+    console.print(f"  runs dir  : [bold]{runs_dir}[/]")
+    console.print(f"  model     : [bold]{model}[/]")
+    console.print("  press Ctrl-C to stop\n")
+
+    uvicorn.run(fastapi_app, host="127.0.0.1", port=port, log_level="warning")
+
+
 if __name__ == "__main__":
     app()
