@@ -374,3 +374,16 @@ def provider_test(body: ConnTestBody):
         out["tool_support"] = res.tool_support
         out["tools_note"] = res.tools_note
     return out
+
+
+@app.post("/api/autodetect", dependencies=[Depends(require_key)])
+async def autodetect(extract: UploadFile = File(...)):
+    """Read the CSV header + first rows, propose a column mapping (Feature 1)."""
+    from .autodetect import detect_columns
+
+    raw = await extract.read()
+    text = raw.decode("utf-8", errors="replace")
+    d = detect_columns(text)
+    return {"system": d.system, "amount_column": d.amount_column,
+            "currency_column": d.currency_column, "column_map": d.column_map,
+            "confidence": d.confidence, "notes": d.notes}

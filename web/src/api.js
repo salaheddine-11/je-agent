@@ -49,6 +49,17 @@ export const api = {
       body: fd,
     }).then(r => r.json());
   },
+  autodetect: async file => {
+    const fd = new FormData();
+    fd.append("extract", file);
+    const res = await fetch(`${BASE}/api/autodetect`, {
+      method: "POST", headers: { "X-API-Key": sessionStorage.getItem("jeagent_key") || "" },
+      body: fd,
+    });
+    const body = await res.json();
+    if (body.detail) throw new Error(body.detail);
+    return body;
+  },
   artifactUrl: (id, name) => `${BASE}/api/runs/${id}/artifacts/${name}`,
   download: async (id, name) => {
     const res = await fetch(`${BASE}/api/runs/${id}/artifacts/${name}`, {

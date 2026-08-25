@@ -8,6 +8,7 @@ const OI_VERM = "#D55E00", OI_GREEN = "#009E73";
 const btn = { background: INK, color: "#fff", border: "none", borderRadius: 7,
               padding: "9px 16px", fontSize: 13, fontWeight: 650, cursor: "pointer" };
 const btnGhost = { ...btn, background: "#fff", color: INK, border: `1.2px solid ${INK}` };
+const btnSmall = { ...btnGhost, padding: "4px 10px", fontSize: 11.5, background: INK, color: "#fff", border: "none" };
 const input = { border: `1px solid ${HAIR}`, borderRadius: 7, padding: "9px 12px",
                 fontSize: 13, width: "100%", boxSizing: "border-box", background: "#fff" };
 const card = { background: CARD, border: `1px solid ${HAIR}`, borderRadius: 8,
@@ -97,7 +98,7 @@ function Configure() {
 const field = { ...input, marginBottom: 4 };
 const lgrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 };
 
-function ConfigForm({ config, setConfig }) {
+function ConfigForm({ config, setConfig, onAutodetect, autodetecting, detection }) {
   const set = (k) => (e) => setConfig({ ...config, [k]: e.target.value });
   const setCol = (k) => (e) => setConfig({
     ...config,
@@ -105,8 +106,17 @@ function ConfigForm({ config, setConfig }) {
   const users = config.high_risk_users.join(", ");
   return (
     <div style={{ background: CARD, border: `1px solid ${HAIR}`, borderRadius: 8, padding: 20, marginBottom: 14 }}>
-      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
-                   margin: "0 0 14px" }}>Engagement</h3>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+        <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                     margin: 0 }}>Engagement</h3>
+        {onAutodetect && (
+          <button style={btnSmall} onClick={onAutodetect} disabled={autodetecting}>
+            {autodetecting ? "Detecting…" : "✨ Auto-detect from CSV"}</button>)}
+      </div>
+      {detection && (
+        <p style={{ fontSize: 11.5, color: SLATE, margin: "0 0 10px" }}>
+          Auto-detected column mapping (confidence {(detection.confidence * 100).toFixed(0)}%).
+          Review and adjust if needed.{detection.notes?.length ? ` ${detection.notes.join(" ")}` : ""}</p>)}
       <div style={lgrid}>
         <div><label style={label}>Run ID</label>
           <input style={field} value={config.run_id} onChange={set("run_id")} /></div>
@@ -159,6 +169,23 @@ function ConfigForm({ config, setConfig }) {
           <input style={field} type="number" value={config.max_universe_size}
                  onChange={e => setConfig({ ...config, max_universe_size: +e.target.value })} /></div>
       </div>
+
+      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "18px 0 14px" }}>Review</h3>
+      <div style={{ display: "flex", gap: 8 }}>
+        {["human", "ai"].map(m => (
+          <button key={m} onClick={() => setConfig({ ...config, review_mode: m })}
+                  style={{
+                    ...(btnSmall), flex: 1,
+                    background: config.review_mode === m ? INK : "#fff",
+                    color: config.review_mode === m ? "#fff" : SLATE,
+                    border: `1px solid ${config.review_mode === m ? INK : HAIR}` }}>
+            {m === "human" ? "👤 Human review" : "🤖 AI review"}</button>))}
+      </div>
+      {config.review_mode === "ai" && (
+        <p style={{ fontSize: 11.5, color: SLATE, margin: "8px 0 0" }}>
+          The engine auto-decides inspect/accept from triage (reviewer "ai-reviewer"). Only for
+          practice/demo or clean populations — AI review is not equivalent to human substantive testing.</p>)}
     </div>
   );
 }
@@ -174,8 +201,35 @@ function NewEngagement({ onStarted }) {
     column_map: { posting_date: "BUDAT", document_date: "BLDAT", account: "HKONT",
                   username: "UNAME", description: "SGTXT", source_doc: "BELNR",
                   entry_ref: "BELNR", entry_created_date: "CPUDT" },
-    high_risk_users: [], max_universe_size: 200,
+    high_risk_users: [], max_universe_size: 200, review_mode: "human",
   });
+  const [autodetecting, setAutodetecting] = useState(false);
+  const [detection, setDetection] = useState(null);
+  const autoDetect = async () => {
+    if (!file) { setMsg({ ok: false, err: "Choose a CSV extract first to auto-detect." }); return; }
+    setAutodetecting(true); setMsg(null);
+    try {
+      const d = await api.autodetect(file);
+      setConfig(c => ({
+        ...c, system: d.system || c.system,
+        amount_column: d.amount_column || c.amount_column,
+        currency_column: d.currency_column || c.currency_column,
+        column_map: {
+          posting_date: d.column_map.posting_date || c.column_map.posting_date,
+          document_date: d.column_map.document_date || c.column_map.document_date,
+          account: d.column_map.account || c.column_map.account,
+          username: d.column_map.username || c.column_map.username,
+          description: d.column_map.description || c.column_map.description,
+          source_doc: d.column_map.source_doc || c.column_map.source_doc,
+          entry_ref: d.column_map.entry_ref || c.column_map.entry_ref,
+          entry_created_date: d.column_map.entry_created_date || c.column_map.entry_created_date,
+          entry_type: d.column_map.entry_type || c.column_map.entry_type,
+        },
+      }));
+      setDetection(d);
+    } catch (e) { setMsg({ ok: false, err: e.message }); }
+    setAutodetecting(false);
+  };
   const yamlOf = () => {
     const c = config, m = c.column_map;
     const map = Object.entries(m).filter(([, v]) => v).map(([k, v]) => `    ${k}: ${v}`).join("\n");
@@ -193,6 +247,7 @@ review:
   max_universe_size: ${c.max_universe_size}
   overflow_policy: stratify
   pack_size: 20
+  mode: ${c.review_mode}
 llm_privacy: {mode: zero_retention, pii_scrubbing: true}
 reviewer: {name: jdoe}
 `;
@@ -223,7 +278,8 @@ reviewer: {name: jdoe}
         <span style={{ color: FAINT, fontSize: 11.5 }}>
           {file ? `Selected: ${file.name}` : "No file selected"}</span>
       </div>
-      <ConfigForm config={config} setConfig={setConfig} />
+      <ConfigForm config={config} setConfig={setConfig} onAutodetect={autoDetect}
+                  autodetecting={autodetecting} detection={detection} />
       {msg && <p style={{ fontSize: 12.5, color: msg.ok ? OI_GREEN : OI_VERM }}>{msg.ok ? msg.text : msg.err}</p>}
       <button style={btn} onClick={start} disabled={busy}>▶ Start run</button>
     </div>
