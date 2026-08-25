@@ -1,0 +1,27 @@
+run_id: STRESS_HUGE
+period_end: '2024-12-31'
+materiality: {overall: 500000, performance: 175000, currency: USD}
+source:
+  system: generic
+  amount_column: AMOUNT
+  currency_column: CUR
+  column_map:
+    posting_date: DATE
+    document_date: DATE
+    account: ACCT
+    username: USER
+    description: DESC
+    source_doc: REF
+    entry_ref: REF
+    entry_created_date: DATE
+    entry_type: TYPE
+review:
+  max_universe_size: 2000
+  overflow_policy: stratify
+  pack_size: 20
+llm_privacy: {mode: zero_retention, pii_scrubbing: true}
+report_lang: {lang: en}
+provider:
+  base_url: https://generativelanguage.googleapis.com/v1beta/openai
+  model: gemini-3.5-flash-lite
+reviewer: {name: stress-test}

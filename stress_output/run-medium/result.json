@@ -1,0 +1,108 @@
+{
+ "lines": 20186,
+ "base_docs": 10000,
+ "injections": 93,
+ "det": {
+  "canonical_rows": 20186,
+  "rejected": 0,
+  "rule_counts": {
+   "manual_entries": 20186,
+   "period_end": 96,
+   "round_amounts": 46,
+   "date_divergence": 28,
+   "entry_splitting": 486,
+   "balance_check": 6,
+   "unusual_users": 16,
+   "unusual_pairs": 10093,
+   "reversals": 24,
+   "high_risk_system_pairs": 0
+  },
+  "universe_selected": 12,
+  "universe_total_flagged": 10093,
+  "workspace": "C:\\Users\\salah eddine\\Desktop\\je-agent\\stress_output\\run-medium\\STRESS_STRESS-MEDIUM\\workspace.duckdb"
+ },
+ "score": {
+  "per_rule": {
+   "round_amounts": {
+    "injected": 12,
+    "flagged": 23,
+    "tp": 12,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "entry_splitting": {
+    "injected": 37,
+    "flagged": 286,
+    "tp": 37,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "period_end": {
+    "injected": 8,
+    "flagged": 48,
+    "tp": 8,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "unusual_pairs": {
+    "injected": 10,
+    "flagged": 10093,
+    "tp": 10,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "unusual_users": {
+    "injected": 8,
+    "flagged": 8,
+    "tp": 8,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "balance_check": {
+    "injected": 6,
+    "flagged": 6,
+    "tp": 6,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "reversals": {
+    "injected": 12,
+    "flagged": 12,
+    "tp": 12,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   }
+  },
+  "aggregate": {
+   "injected": 93,
+   "flagged": 10093,
+   "tp": 93,
+   "fn": 0,
+   "fp": 10000,
+   "precision": 0.0092,
+   "recall": 1.0,
+   "f1": 0.0183
+  }
+ }
+}

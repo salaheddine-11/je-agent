@@ -1,0 +1,108 @@
+{
+ "lines": 2092,
+ "base_docs": 1000,
+ "injections": 46,
+ "det": {
+  "canonical_rows": 2092,
+  "rejected": 0,
+  "rule_counts": {
+   "manual_entries": 2092,
+   "period_end": 20,
+   "round_amounts": 12,
+   "date_divergence": 14,
+   "entry_splitting": 54,
+   "balance_check": 3,
+   "unusual_users": 8,
+   "unusual_pairs": 1046,
+   "reversals": 12,
+   "high_risk_system_pairs": 0
+  },
+  "universe_selected": 7,
+  "universe_total_flagged": 1046,
+  "workspace": "C:\\Users\\salah eddine\\Desktop\\je-agent\\stress_output\\run-small\\STRESS_STRESS-SMALL\\workspace.duckdb"
+ },
+ "score": {
+  "per_rule": {
+   "round_amounts": {
+    "injected": 6,
+    "flagged": 6,
+    "tp": 6,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "entry_splitting": {
+    "injected": 18,
+    "flagged": 32,
+    "tp": 18,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "period_end": {
+    "injected": 4,
+    "flagged": 10,
+    "tp": 4,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "unusual_pairs": {
+    "injected": 5,
+    "flagged": 1046,
+    "tp": 5,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "unusual_users": {
+    "injected": 4,
+    "flagged": 4,
+    "tp": 4,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "balance_check": {
+    "injected": 3,
+    "flagged": 3,
+    "tp": 3,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "reversals": {
+    "injected": 6,
+    "flagged": 6,
+    "tp": 6,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   }
+  },
+  "aggregate": {
+   "injected": 46,
+   "flagged": 1046,
+   "tp": 46,
+   "fn": 0,
+   "fp": 1000,
+   "precision": 0.044,
+   "recall": 1.0,
+   "f1": 0.0842
+  }
+ }
+}

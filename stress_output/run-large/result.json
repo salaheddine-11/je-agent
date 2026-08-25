@@ -1,0 +1,108 @@
+{
+ "lines": 100302,
+ "base_docs": 50000,
+ "injections": 151,
+ "det": {
+  "canonical_rows": 100302,
+  "rejected": 0,
+  "rule_counts": {
+   "manual_entries": 100302,
+   "period_end": 414,
+   "round_amounts": 118,
+   "date_divergence": 48,
+   "entry_splitting": 2566,
+   "balance_check": 10,
+   "unusual_users": 24,
+   "unusual_pairs": 50151,
+   "reversals": 48,
+   "high_risk_system_pairs": 0
+  },
+  "universe_selected": 13,
+  "universe_total_flagged": 50151,
+  "workspace": "C:\\Users\\salah eddine\\Desktop\\je-agent\\stress_output\\run-large\\STRESS_STRESS-LARGE\\workspace.duckdb"
+ },
+ "score": {
+  "per_rule": {
+   "round_amounts": {
+    "injected": 20,
+    "flagged": 59,
+    "tp": 20,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "entry_splitting": {
+    "injected": 55,
+    "flagged": 1286,
+    "tp": 55,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "period_end": {
+    "injected": 12,
+    "flagged": 207,
+    "tp": 12,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "unusual_pairs": {
+    "injected": 18,
+    "flagged": 50151,
+    "tp": 18,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "unusual_users": {
+    "injected": 12,
+    "flagged": 12,
+    "tp": 12,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "balance_check": {
+    "injected": 10,
+    "flagged": 10,
+    "tp": 10,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "reversals": {
+    "injected": 24,
+    "flagged": 24,
+    "tp": 24,
+    "fn": 0,
+    "fp_clean": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   }
+  },
+  "aggregate": {
+   "injected": 151,
+   "flagged": 50151,
+   "tp": 151,
+   "fn": 0,
+   "fp": 50000,
+   "precision": 0.003,
+   "recall": 1.0,
+   "f1": 0.006
+  }
+ }
+}
