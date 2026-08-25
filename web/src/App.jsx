@@ -65,12 +65,14 @@ function Aurora() {
     gsap.to(".orb-a", { x: 90, y: -60, scale: 1.15, duration: 26, yoyo: true, repeat: -1, ease: "sine.inOut" });
     gsap.to(".orb-b", { x: -110, y: 70, duration: 32, yoyo: true, repeat: -1, ease: "sine.inOut" });
     gsap.to(".orb-c", { x: 60, y: 100, scale: 0.9, duration: 38, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".orb-d", { x: -70, y: -90, duration: 29, yoyo: true, repeat: -1, ease: "sine.inOut" });
   }, { scope: wrap });
   return (
     <div ref={wrap} aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
-      <div className="orb-a absolute -top-40 right-[8%] size-[560px] rounded-full bg-amber/[0.07] blur-[120px]" />
-      <div className="orb-b absolute bottom-[-160px] left-[4%] size-[520px] rounded-full bg-emerald-700/[0.05] blur-[130px]" />
-      <div className="orb-c absolute left-[38%] top-[30%] size-[420px] rounded-full bg-orange-300/20 blur-[110px]" />
+      <div className="orb-a absolute -top-40 right-[8%] size-[560px] rounded-full bg-amber/[0.16] blur-[110px]" />
+      <div className="orb-b absolute bottom-[-160px] left-[4%] size-[520px] rounded-full bg-emerald-800/[0.10] blur-[120px]" />
+      <div className="orb-c absolute left-[38%] top-[30%] size-[420px] rounded-full bg-orange-400/[0.30] blur-[100px]" />
+      <div className="orb-d absolute -bottom-24 right-[28%] size-[380px] rounded-full bg-rose-300/[0.14] blur-[110px]" />
     </div>);
 }
 

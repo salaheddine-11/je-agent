@@ -56,3 +56,19 @@ runs_smoke*/
 # UI runtime artifacts
 _ui_uploads/
 streamlit_boot.log
+
+# Scratch browser/QA screenshots + dev logs (never commit)
+/audit_*.png
+/v11*.png
+/v112*.png
+/v113*.png
+/v114*.png
+/v115*.png
+/v116*.png
+/v117*.png
+npm_install.log
+shadcn_init.log
+shadcn_add.log
+
+# UI build output
+web/dist/
