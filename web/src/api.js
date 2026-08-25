@@ -60,7 +60,17 @@ export const api = {
     if (body.detail) throw new Error(body.detail);
     return body;
   },
-  artifactUrl: (id, name) => `${BASE}/api/runs/${id}/artifacts/${name}`,
+  artifactUrl: async (id, name) => {
+    // Fetch a scoped token, then return a URL that opens WITHOUT the X-API-Key
+    // header — so the in-app preview / a new tab can render report.pdf etc.
+    // without triggering a browser auth prompt (raw 401 → Windows dialog).
+    const r = await fetch(`${BASE}/api/runs/${id}/artifacts/${name}/token`, {
+      headers: { "X-API-Key": sessionStorage.getItem("jeagent_key") || "" },
+    });
+    const b = await r.json();
+    if (b.detail) throw new Error(b.detail);
+    return `${BASE}/api/runs/${id}/artifact/${name}?token=${encodeURIComponent(b.token)}`;
+  },
   download: async (id, name) => {
     const res = await fetch(`${BASE}/api/runs/${id}/artifacts/${name}`, {
       headers: { "X-API-Key": sessionStorage.getItem("jeagent_key") || "" },

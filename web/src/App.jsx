@@ -524,15 +524,22 @@ function Report({ runId }) {
         <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
                      color: SLATE, margin: "0 0 14px" }}>Deliverables</h2>
         {arts.map(n => (
-          <button key={n} onClick={async () => {
-            try { await api.download(runId, n); }
-            catch (e) { setDl(e.message); }
-          }}
-            style={{ display: "flex", justifyContent: "space-between", width: "100%",
-                     padding: "10px 0", fontSize: 13, color: INK, cursor: "pointer",
-                     border: "none", borderBottom: `1px solid ${HAIR}`, background: "transparent" }}>
-            <span>⬇️ {n}</span><span style={{ color: SLATE }}>download</span>
-          </button>))}
+          <div key={n} style={{ display: "flex", justifyContent: "space-between",
+                                alignItems: "center", padding: "10px 0",
+                                borderBottom: `1px solid ${HAIR}` }}>
+            <span style={{ color: INK, fontSize: 13 }}>⬇️ {n}</span>
+            <span style={{ display: "flex", gap: 8 }}>
+              {(n === "report.pdf" || n === "report.html") && (
+                <button style={btnSmall} onClick={async () => {
+                  try { window.open(await api.artifactUrl(runId, n), "_blank"); }
+                  catch (e) { setDl(e.message); }
+                }}>view</button>)}
+              <button style={btnGhost} onClick={async () => {
+                try { await api.download(runId, n); }
+                catch (e) { setDl(e.message); }
+              }}>download</button>
+            </span>
+          </div>))}
         {dl && <p style={{ fontSize: 12, color: OI_VERM, marginTop: 8 }}>{dl}</p>}
       </div>
       {m?.benford?.mad != null && (

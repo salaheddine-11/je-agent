@@ -356,6 +356,65 @@ def download_artifact(run_id: str, name: str):
     return FileResponse(path, media_type=allowed[name], filename=name)
 
 
+ARTIFACT_NAMES = {"report.pdf", "report.html", "flagged_entries.xlsx", "workpaper.xlsx"}
+
+
+def _artifact_secret() -> bytes:
+    return os.environ.get("JEAGENT_ARTIFACT_SECRET", "je-agent-dev-secret").encode()
+
+
+def _issue_token(run_id: str, name: str, ttl: int = 1800) -> str:
+    """Scoped, expiring token so the browser can open an artifact directly (in the
+    preview pane / a new tab) WITHOUT the API-key header — the key never appears
+    in a URL or a server log. HMAC(run_id:name:exp); not reversible to the key."""
+    exp = int(os.environ.get("JEAGENT_ARTIFACT_TTL", ttl))
+    expiry = int(__import__("time").time()) + exp
+    payload = f"{run_id}:{name}:{expiry}"
+    sig = hmac.new(_artifact_secret(), payload.encode(), hashlib.sha256).hexdigest()
+    return f"{expiry}.{sig}"
+
+
+def _verify_token(run_id: str, name: str, token: str) -> bool:
+    try:
+        expiry, sig = token.split(".", 1)
+        payload = f"{run_id}:{name}:{expiry}"
+        expect = hmac.new(_artifact_secret(), payload.encode(), hashlib.sha256).hexdigest()
+        return int(expiry) > int(__import__("time").time()) and hmac.compare_digest(sig, expect)
+    except (ValueError, TypeError):
+        return False
+
+
+@app.get("/api/runs/{run_id}/artifacts/{name}/token", dependencies=[Depends(require_key)])
+def artifact_token(run_id: str, name: str):
+    """Return a short-lived, scoped token for opening an artifact without the key."""
+    if name not in ARTIFACT_NAMES:
+        raise HTTPException(400, f"unknown artifact {name}")
+    return {"token": _issue_token(run_id, name)}
+
+
+@app.get("/api/runs/{run_id}/artifact/{name}")
+def download_artifact_token(run_id: str, name: str, token: str):
+    """Unauthenticated-by-header variant: VALID ONLY with a scoped token. Lets the
+    in-app preview / a new tab render report.pdf etc. without a 401 challenge."""
+    from fastapi.responses import FileResponse
+
+    if name not in ARTIFACT_NAMES:
+        raise HTTPException(400, f"unknown artifact {name}")
+    if not _verify_token(run_id, name, token):
+        raise HTTPException(401, "invalid or expired artifact token")
+    path = _runs_root() / run_id / "artifacts" / name
+    if not path.exists():
+        raise HTTPException(404, "artifact not generated yet")
+    media = {"report.pdf": "application/pdf", "report.html": "text/html",
+             "flagged_entries.xlsx":
+                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+             "workpaper.xlsx":
+                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}[name]
+    # inline (not attachment) so a browser tab / preview pane RENDERS report.pdf
+    # instead of forcing a download.
+    return FileResponse(path, media_type=media, content_disposition_type="inline")
+
+
 # ---------------------------------------------------------------- diagnostics
 
 
