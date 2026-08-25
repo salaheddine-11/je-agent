@@ -209,11 +209,88 @@ def score(scenario: Scenario, det: dict, run_dir: Path, config) -> dict:
                          "universe_recall": round(univ_recall, 4)}}
 
 
+def run_triage_leg(name: str, run_dir: Path) -> dict:
+    """Run real LLM triage on the scenario's universe; score agreement with
+    injected ground truth. Uses OpenAICOMpatibleProvider (Gemini via env key).
+    Unused-injected = out-of-scope sub-PM entries are excluded (by design)."""
+    import json as _json
+
+    from je_agent.llm.provider import OpenAICompatibleProvider
+    from je_agent.run_context import RunContext
+    from je_agent.store import RunStore
+    from je_agent.triage import run_triage
+    from je_agent.universe import select_universe
+
+    config = load_config(run_dir / "config.yaml")
+    # matches run_deterministic: f"STRESS_{scenario.name.upper()}" where
+    # scenario.name = f"stress-{name}" → "STRESS_STRESS-SMALL"
+    run_id = f"STRESS_STRESS-{name.upper()}"
+    ctx = RunContext(run_dir / run_id)
+    store = RunStore(ctx.runstore_path)
+
+    con = duckdb.connect(str(ctx.duckdb_path))
+    universe = select_universe(con, config)
+    # re-derive ground truth from the extract present in this run dir
+    sc = build_scenario(f"stress-{name}",
+                        SCENARIOS[name]["n_docs"], SCENARIOS[name]["seed"],
+                        SCENARIOS[name]["anom"])
+
+    key = os.environ.get("JEAGENT_API_KEY") or os.environ.get("GEMINI_API_KEY") or ""
+    provider = OpenAICompatibleProvider(base_url=config.provider.base_url,
+                                        model=config.provider.model, api_key=key)
+    report = run_triage(con, config, provider, universe, store, run_id,
+                        save_to=run_dir / "triage_report.json")
+    con.close()
+    store.close()
+
+    # ---- score agreement ---------------------------------------------------
+    anomaly_by_ref = {ref: rule for ref, rule, _ in sc.anomalies}
+    adj = {a.entry_ref: a for a in report.assessments}
+
+    n_inj_inp = n_inj_insp = n_clean_inp = n_clean_accept = 0
+    false_neg = []   # injected anomaly the LLM said "accept" (missed)
+    false_pos = []   # clean entry the LLM said "inspect" (false alarm)
+    for ref, a in adj.items():
+        if ref in anomaly_by_ref:
+            n_inj_inp += 1
+            if a.recommended_action == "inspect":
+                n_inj_insp += 1
+            else:
+                false_neg.append((ref, a.recommended_action, a.concern_note[:90]))
+        else:
+            n_clean_inp += 1
+            if a.recommended_action == "accept_flag":
+                n_clean_accept += 1
+            else:
+                false_pos.append((ref, a.recommended_action, a.concern_note[:90]))
+
+    inj_recall = n_inj_insp / n_inj_inp if n_inj_inp else 1.0
+    # precision of 'inspect' calls against ground truth:
+    n_inspected = sum(1 for a in adj.values() if a.recommended_action == "inspect")
+    insp_precision = n_inj_insp / n_inspected if n_inspected else 1.0
+
+    print(f"  TRIAGE leg: {len(adj)} assessed | injected {n_inj_insp}/{n_inj_inp} "
+          f"flagged inspect (recall {inj_recall:.2%}) | inspect-precision "
+          f"{insp_precision:.2%} | clean entries wrongly inspect: {len(false_pos)}")
+    for ref, act, note in false_neg[:5]:
+        print(f"    MISSED injected {ref}: LLM said '{act}' — {note}")
+    for ref, act, note in false_pos[:5]:
+        print(f"    FALSE ALARM clean {ref}: LLM said '{act}' — {note}")
+
+    return {"assessed": len(adj), "injected_assessed": n_inj_inp,
+            "injected_inspect": n_inj_insp, "injected_recall": round(inj_recall, 4),
+            "inspect_precision": round(insp_precision, 4),
+            "clean_assessed": n_clean_inp, "clean_accept": n_clean_accept,
+            "false_neg": [f"{r} ({a})" for r, a, _ in false_neg],
+            "false_pos": [f"{r} ({a})" for r, a, _ in false_pos]}
+
+
 def main() -> int:
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenarios", default="small,medium,large,huge")
-    ap.add_argument("--skip-triage", action="store_true")
+    ap.add_argument("--triage", action="store_true",
+                    help="run the real LLM triage leg on `small` and score human-agreement")
     args = ap.parse_args()
 
     OUT.mkdir(exist_ok=True)
@@ -264,6 +341,15 @@ def main() -> int:
 
     total = time.time() - start_all
     (OUT / "results.json").write_text(json.dumps(all_results, indent=1), encoding="utf-8")
+
+    triage_result = None
+    if args.triage:
+        print("\n=== LLM triage leg (small scenario, real provider) ===")
+        print("  running… (LLM calls; takes a few minutes)")
+        triage_result = run_triage_leg("small", OUT / "run-small")
+        all_results["small"]["triage_agreement"] = triage_result
+        (OUT / "results.json").write_text(json.dumps(all_results, indent=1),
+                                          encoding="utf-8")
 
     # ---- notes.md for the report ------------------------------------------
     note_lines = [

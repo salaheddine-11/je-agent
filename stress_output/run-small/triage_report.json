@@ -1,0 +1,196 @@
+{
+  "assessments": [
+    {
+      "entry_ref": "A10003",
+      "rationale_concern": "medium",
+      "concern_note": "Manual entry with a large round amount (500,000.00 USD) affecting consulting and account 51410000.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "A10016",
+      "rationale_concern": "medium",
+      "concern_note": "Manual entry with an unusual account pair (51410000 / 23490500) and description asset purchase via expense flow.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "A10002",
+      "rationale_concern": "medium",
+      "concern_note": "Manual entry with a large round amount (250,000.00 USD) affecting consulting and account 51410000.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "A10018",
+      "rationale_concern": "medium",
+      "concern_note": "Manual entry with an unusual account pair (51410000 / 23250300) and description asset purchase via expense flow.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "A10017",
+      "rationale_concern": "medium",
+      "concern_note": "Manual entry with an unusual account pair (51410000 / 23240200) and description asset purchase via expense flow.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "A10015",
+      "rationale_concern": "medium",
+      "concern_note": "Manual entry with an unusual account pair (51410000 / 23870500) and description asset purchase via expense flow.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "A10019",
+      "rationale_concern": "medium",
+      "concern_note": "Manual entry with an unusual account pair (51410000 / 23330500) and description asset purchase via expense flow.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000193",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry for utility fee involving accounts 420000 and 51410000.",
+      "recommended_action": "accept_flag",
+      "priority": 2
+    },
+    {
+      "entry_ref": "B0000165",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry for service fee involving accounts 610000 and 51410000.",
+      "recommended_action": "accept_flag",
+      "priority": 2
+    },
+    {
+      "entry_ref": "B0000765",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry for service fee involving accounts 420000 and 51410000.",
+      "recommended_action": "accept_flag",
+      "priority": 2
+    },
+    {
+      "entry_ref": "B0000470",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for office supplies.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000592",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for rent charge.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000603",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for rent charge.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000393",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for supplier invoice.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000314",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for service fee.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000925",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for service fee.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000216",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for service fee.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000982",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for rent charge.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000911",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for utility fee.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000059",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry flag triggered for utility fee.",
+      "recommended_action": "inspect",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000191",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry (source) rule hit for utility fee posting.",
+      "recommended_action": "accept_flag",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000378",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry (source) rule hit for rent charge posting.",
+      "recommended_action": "accept_flag",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000683",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry (source) rule hit for office supplies posting.",
+      "recommended_action": "accept_flag",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000316",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry (source) rule hit for utility fee posting.",
+      "recommended_action": "accept_flag",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000913",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry (source) rule hit for utility fee posting.",
+      "recommended_action": "accept_flag",
+      "priority": 3
+    },
+    {
+      "entry_ref": "B0000796",
+      "rationale_concern": "low",
+      "concern_note": "Manual entry (source) rule hit for service fee posting.",
+      "recommended_action": "accept_flag",
+      "priority": 3
+    }
+  ],
+  "universe_covered": 26,
+  "suggested_followups": [],
+  "pack_ids": [
+    "pack_001",
+    "pack_002",
+    "pack_003"
+  ],
+  "rubric_version": "1.0.0",
+  "consistency_warnings": [],
+  "summary": "[pack_001] Pack pack_001 contains 10 documents representing journal entries. Entries with multiple risk indicators (manual source combined with round amounts or unusual account pairs) were assessed as medium concern requiring inspection, while entries flagged only for being manual entries with routine descriptions were assessed as low concern. | [pack_002] Pack pack_002 contains 10 journal entries (20 lines total), all flagged solely for being manual entries. Each entry represents standard operating expenses or revenues such as office supplies, rent charges, supplier invoices, service fees, and utility fees, posted by various users with low risk characteristics. | [pack_003] Pack pack_003 contains 6 manual journal entry documents covering operating expenses and bank/cash accounts, each hitting the manual entry source rule. All entries have low concern ratings."
+}

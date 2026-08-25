@@ -1,0 +1,27 @@
+
+=== small: 2,106 lines (1,000 base docs, 53 injections) ===
+  ingest 2,106 rows (0 rejected) — 2.7s
+  rule flags: manual_entries=1886, period_end=24, round_amounts=14, date_divergence=22, entry_splitting=39, balance_check=3, unusual_users=20, unusual_pairs=11, reversals=12, high_risk_system_pairs=10
+  scored in 0.2s — aggregate precision=0.7361 recall=1.0 f1=0.848 | universe_recall=1.0 (7/53 injected make the universe)
+    ✓ round_amounts      recall=100.00% precision=85.71% f1=92.31% (6/6 injected, 1 fp on clean)
+    ✓ entry_splitting    recall=100.00% precision=90.00% f1=94.74% (18/18 injected, 2 fp on clean)
+    ✓ period_end         recall=100.00% precision=50.00% f1=66.67% (4/4 injected, 4 fp on clean)
+    ✓ unusual_pairs      recall=100.00% precision=100.00% f1=100.00% (5/5 injected, 0 fp on clean)
+    ✓ unusual_users      recall=100.00% precision=40.00% f1=57.14% (4/4 injected, 6 fp on clean)
+    ✓ balance_check      recall=100.00% precision=100.00% f1=100.00% (3/3 injected, 0 fp on clean)
+    ✓ reversals          recall=100.00% precision=100.00% f1=100.00% (6/6 injected, 0 fp on clean)
+    ✓ date_divergence    recall=100.00% precision=100.00% f1=100.00% (4/4 injected, 0 fp on clean)
+    ✓ high_risk_system_pairs recall=100.00% precision=30.00% f1=46.15% (3/3 injected, 7 fp on clean)
+
+=== LLM triage leg (small scenario, real provider) ===
+  running… (LLM calls; takes a few minutes)
+  TRIAGE leg: 26 assessed | injected 7/7 flagged inspect (recall 100.00%) | inspect-precision 41.18% | clean entries wrongly inspect: 19
+    FALSE ALARM clean B0000193: LLM said 'accept_flag' — Manual entry for utility fee involving accounts 420000 and 51410000.
+    FALSE ALARM clean B0000165: LLM said 'accept_flag' — Manual entry for service fee involving accounts 610000 and 51410000.
+    FALSE ALARM clean B0000765: LLM said 'accept_flag' — Manual entry for service fee involving accounts 420000 and 51410000.
+    FALSE ALARM clean B0000470: LLM said 'inspect' — Manual entry flag triggered for office supplies.
+    FALSE ALARM clean B0000592: LLM said 'inspect' — Manual entry flag triggered for rent charge.
+
+💾 results: C:\Users\salah eddine\Desktop\je-agent\stress_output\results.json
+💾 notes: C:\Users\salah eddine\Desktop\je-agent\stress_output\notes.md
+EXIT=0
