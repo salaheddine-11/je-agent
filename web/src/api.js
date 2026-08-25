@@ -71,6 +71,10 @@ export const api = {
     const a = document.createElement("a");
     a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+    // Revoke AFTER the browser has had time to read the blob. Revoking
+    // immediately races the async download and can write a 0-byte file for
+    // large artifacts (e.g. the PDF). Delay improves reliability without
+    // leaking the object URL for long (small leak, acceptable).
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
   },
 };
