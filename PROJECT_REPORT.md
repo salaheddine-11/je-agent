@@ -146,6 +146,24 @@ scoping), not a bug.
 inspect calls are broad — exactly the noise the *human auditor* resolves. This
 validates the 3-layer design: the LLM is a prioritizer, not the decision-maker.
 
+### 3.5 Parameter tuning (measured A/B, medium scenario)
+
+| Metric | Default | Tuned (`period_end_window_days=1`, `unusual_account_share=0.02`) |
+|---|---|---|
+| Aggregate precision | 18.9% | **42.3%** (×2.2) |
+| Aggregate recall | 100% | **100%** (unchanged) |
+| F1 | 31.8% | **59.5%** |
+| `period_end` precision | 20.5% (31 FP) | **100%** (0 FP) |
+| `high_risk_system_pairs` precision | 2.1% (277 FP) | **100%** (0 FP) |
+
+**Conclusion (band-coupling):** `period_end_window_days` and
+`unusual_account_share` are safe precision knobs — narrowing/raising them
+kills noise with zero recall loss and no band re-alignment needed.
+`split_threshold` / `round_number_min_amount` are **band-coupled**: moving
+them requires the reviewed population's anomaly bands to align with the
+engagement materiality (auditor judgment, config-driven) — a documented
+config-consistency requirement, now *measurable* via the harness.
+
 ---
 
 ## 4. Evaluation (honest conclusion)
