@@ -191,34 +191,30 @@ svg text {{ font-family: inherit; }}
   .coverpage {{ page-break-after: always; }}
 }}
 .coverpage {{ height: 257mm; display: flex; flex-direction: column;
-             background: {PAPER}; border-radius: 0; }}
-.cv-band {{ background: {INK}; color: #fff; padding: 44px 38px 40px; }}
-.cv-firm {{ font-size: 10px; letter-spacing: 3.2px; text-transform: uppercase;
-           color: #aeb6bf; margin-bottom: 12px; }}
-.cv-title {{ font-size: 36px; font-weight: 800; letter-spacing: .2px; line-height: 1.1; }}
-.cv-sub {{ margin-top: 10px; font-size: 13px; color: #cfd4d9; max-width: 620px;
-          line-height: 1.6; }}
-.cv-body {{ flex: 1; padding: 30px 38px 26px; display: flex; flex-direction: column;
-           justify-content: space-between; }}
-.cv-eyebrow {{ font-size: 10.5px; letter-spacing: 1.8px; text-transform: uppercase;
-              color: {SLATE}; margin-bottom: 12px; }}
-table.cv {{ width: 100%; border-collapse: collapse; font-size: 12.5px; background: {CARD};
-           border: 1px solid {HAIR}; }}
-table.cv td {{ padding: 10px 14px; border-bottom: 1px solid {HAIR}; vertical-align: top; }}
+             background: {CARD}; padding: 0; }}
+.cv-head {{ padding: 46px 50px 0; }}
+.cv-firm {{ font-size: 9.5px; letter-spacing: 2.6px; text-transform: uppercase;
+           color: {SLATE}; margin-bottom: 18px; }}
+.cv-title {{ font-size: 30px; font-weight: 700; letter-spacing: .1px; line-height: 1.15;
+            color: {INK}; }}
+.cv-sub {{ margin-top: 12px; font-size: 13px; color: {SLATE}; max-width: 560px;
+          line-height: 1.65; }}
+.cv-rule {{ border: none; border-top: 1px solid {HAIR}; margin: 30px 50px 0; }}
+.cv-body {{ flex: 1; padding: 28px 50px; display: flex; flex-direction: column;
+           justify-content: flex-start; }}
+.cv-eyebrow {{ font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+              color: {SLATE}; margin-bottom: 16px; }}
+table.cv {{ width: 100%; border-collapse: collapse; font-size: 12.5px; background: {CARD}; }}
+table.cv td {{ padding: 12px 0; border-bottom: 1px solid {HAIR}; vertical-align: top; }}
 table.cv tr:last-child td {{ border-bottom: none; }}
-table.cv td.k {{ width: 32%; color: {SLATE}; text-transform: uppercase; font-size: 10.5px;
-                letter-spacing: .8px; padding-top: 12px; }}
-table.cv td.v {{ font-weight: 650; }}
-.cv-stats {{ display: flex; border-top: 2px solid {INK}; padding-top: 18px;
-            margin-top: 26px; }}
-.cv-stat {{ flex: 1; padding-right: 18px; }}
-.cv-stat .n {{ font-size: 30px; font-weight: 800; letter-spacing: -.5px;
-              font-variant-numeric: tabular-nums; }}
-.cv-stat .t {{ font-size: 10px; color: {SLATE}; text-transform: uppercase;
-              letter-spacing: 1.2px; margin-top: 2px; }}
-.cv-foot {{ padding: 16px 38px 24px; color: {SLATE}; font-size: 11px;
+table.cv td.k {{ width: 30%; color: {SLATE}; font-size: 10.5px;
+                letter-spacing: .6px; text-transform: uppercase; padding-top: 11px; }}
+table.cv td.v {{ font-weight: 600; color: {INK}; }}
+.cv-rule2 {{ border: none; border-top: 1px solid {HAIR}; margin: 30px 0 0; }}
+.cv-foot {{ padding: 18px 50px 30px; color: {SLATE}; font-size: 10.5px;
            border-top: 1px solid {HAIR}; display: flex; justify-content: space-between;
-           gap: 20px; }}
+           gap: 24px; line-height: 1.55; }}
+.cv-foot b {{ color: {INK}; }}
 """
 
 
@@ -625,12 +621,13 @@ def build_report(run_dir: Path) -> Path:
                  if fin else "Run not yet finalized — gates pending.")
     H.append(f"""
 <div class="coverpage">
-  <div class="cv-band">
+  <div class="cv-head">
     <div class="cv-firm">Journal Entry Testing · ISA 240 / AS 2401</div>
     <div class="cv-title">{_esc(run_id)}</div>
     <div class="cv-sub">{_esc(config.source.system.upper())} journal-entry extract —
       risk assessment, AI-assisted triage and auditor review workpaper</div>
   </div>
+  <hr class="cv-rule">
   <div class="cv-body">
     <div class="cv-eyebrow">Engagement summary</div>
     <table class="cv">
@@ -656,23 +653,11 @@ def build_report(run_dir: Path) -> Path:
           <td class="v"><span class="status-pill {'ok' if fin else 'warn'}">
             {'FINALIZED' if fin else 'DRAFT'}</span> — {gate_note}</td></tr>
     </table>
-    <div class="cv-stats">
-      <div class="cv-stat"><div class="n">{population:,}</div>
-        <div class="t">lines tested</div></div>
-      <div class="cv-stat"><div class="n">{flagged_docs:,}</div>
-        <div class="t">flagged</div></div>
-      <div class="cv-stat"><div class="n">{universe.selected:,}</div>
-        <div class="t">review universe</div></div>
-      <div class="cv-stat"><div class="n">{dec_counts['inspect']}</div>
-        <div class="t">sent to inspection</div></div>
-      <div class="cv-stat"><div class="n">{rule_counts.get('balance_check', 0)}</div>
-        <div class="t">unbalanced docs</div></div>
-    </div>
   </div>
   <div class="cv-foot">
-    <span><b>Confidential.</b> Prepared with JE Agent — deterministic rules,
-    LLM-assisted triage, human judgment. Engagement workpaper; see limitations
-    before relying on its contents.</span>
+    <span style="max-width:520px"><b>Confidential.</b> Prepared with JE Agent —
+      deterministic rules, LLM-assisted triage, human judgment. Engagement
+      workpaper; see limitations before relying on its contents.</span>
     <span>Generated {gen_ts}</span>
   </div>
 </div>""")
