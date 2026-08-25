@@ -1,6 +1,6 @@
 [project]
 name = "je-agent"
-version = "1.0.0"
+version = "1.1.0"
 description = "JE Agent — Journal Entry Testing AI Agent per ISA 240 / AS 2401 (deterministic core, Phase 1)"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"

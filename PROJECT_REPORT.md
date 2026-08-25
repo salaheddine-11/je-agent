@@ -197,7 +197,27 @@ role. That honesty is the project's strongest credibility asset.
 
 ---
 
-## 5. Future work
+## 5. v1.1 — Console redesign
+
+The v1.0 console (functional but generic) was rebuilt as a designed product:
+
+- **Stack migration**: inline-styled React → **shadcn/ui + Tailwind v4 + GSAP**,
+  lucide icons, sonner toasts — modern, MIT-licensed foundation
+- **Design language**: warm-paper ledger identity (ink `#1f1e1c`, paper `#faf9f7`,
+  single amber accent `#b45309`), grounded in the Notion token spec; oversized
+  editorial headline on the login cover ("Journal-entry testing, *decided.*")
+- **App shell**: sidebar navigation with icon active states, collapse, sticky
+  frosted header; page transitions via GSAP
+- **Signature elements**: halftone dot-grid motif, review **ledger** with amber
+  drill-down slip, decisions donut, Benford chart with expected-distribution lines
+- **Atmosphere**: aurora orbs drifting behind glassmorphism cards, film grain,
+  particles on the dark login cover — all transform-only, reduced-motion aware
+- **Verified**: zero JS errors across all pages; vision-QA'd login/dashboard/
+  monitor/review/report; EN/FR intact; browser-tested downloads
+
+---
+
+## 6. Future work
 
 - **Tuning** `rule_params` (PM-relative split threshold, narrower period-end
   window, share thresholds) — the stress harness makes tuning *measurable*
