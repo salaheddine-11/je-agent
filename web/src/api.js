@@ -23,6 +23,13 @@ export const api = {
   runs: () => req("/api/runs"),
   runDetail: id => req(`/api/runs/${id}`),
   metrics: id => req(`/api/runs/${id}/metrics`),
+  deleteRun: async id => {
+    const r = await fetch(`${BASE}/api/runs/${id}`, { method: "DELETE",
+      headers: { "X-API-Key": sessionStorage.getItem("jeagent_key") || "" } });
+    const b = await r.json();
+    if (b.detail) throw new Error(b.detail);
+    return b;
+  },
   entryDetail: (id, ref) => req(`/api/runs/${id}/entry/${encodeURIComponent(ref)}`),
   universe: id => req(`/api/runs/${id}/universe`),
   saveDecisions: (id, reviewer, decisions) =>

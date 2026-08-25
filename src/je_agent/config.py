@@ -182,6 +182,15 @@ class Provider(BaseModel):
     model: str = Field(default="gemini-3.5-flash-lite")
 
 
+class ReportLang(BaseModel):
+    """Report language: 'en' or 'fr'. Affects section titles, cover labels,
+    table headers in the generated report. Data values stay verbatim."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    lang: Literal["en", "fr"] = "en"
+
+
 class EngagementConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -196,6 +205,7 @@ class EngagementConfig(BaseModel):
     review: Review = Field(default_factory=Review)
     rule_params: RuleParams = Field(default_factory=RuleParams)
     provider: Provider = Field(default_factory=Provider)
+    report_lang: ReportLang = Field(default_factory=ReportLang)
     reviewer: Reviewer
 
 

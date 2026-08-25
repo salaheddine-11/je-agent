@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import { api, BASE } from "./api";
+import { STRINGS } from "./i18n";
 
 const INK = "#111827", SLATE = "#4b5563", FAINT = "#9ca3af", HAIR = "#e5e7eb",
       PAPER = "#f6f7f8", CARD = "#fff", AMBER = "#b45309";
@@ -186,6 +187,20 @@ function ConfigForm({ config, setConfig, onAutodetect, autodetecting, detection 
         <p style={{ fontSize: 11.5, color: SLATE, margin: "8px 0 0" }}>
           The engine auto-decides inspect/accept from triage (reviewer "ai-reviewer"). Only for
           practice/demo or clean populations — AI review is not equivalent to human substantive testing.</p>)}
+
+      <h3 style={{ fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: SLATE,
+                   margin: "18px 0 14px" }}>Report language</h3>
+      <div style={{ display: "flex", gap: 8 }}>
+        {[["en", "🇬🇧 English"], ["fr", "🇫🇷 Français"]].map(([code, lbl]) => (
+          <button key={code} onClick={() => setConfig({ ...config, report_lang: code })}
+                  style={{ ...(btnSmall), flex: 1,
+                    background: (config.report_lang || "en") === code ? INK : "#fff",
+                    color: (config.report_lang || "en") === code ? "#fff" : SLATE,
+                    border: `1px solid ${(config.report_lang || "en") === code ? INK : HAIR}` }}>
+            {lbl}</button>))}
+      </div>
+      <p style={{ fontSize: 11, color: FAINT, margin: "8px 0 0" }}>
+        Affects the generated report (cover, sections, tables). UI language is the EN/FR switch at the top.</p>
     </div>
   );
 }
@@ -202,6 +217,7 @@ function NewEngagement({ onStarted }) {
                   username: "UNAME", description: "SGTXT", source_doc: "BELNR",
                   entry_ref: "BELNR", entry_created_date: "CPUDT" },
     high_risk_users: [], max_universe_size: 200, review_mode: "human",
+    report_lang: "en",
   });
   const [autodetecting, setAutodetecting] = useState(false);
   const [detection, setDetection] = useState(null);
@@ -249,6 +265,7 @@ review:
   pack_size: 20
   mode: ${c.review_mode}
 llm_privacy: {mode: zero_retention, pii_scrubbing: true}
+report_lang: {lang: ${c.report_lang || "en"}}
 reviewer: {name: jdoe}
 `;
   };
@@ -287,16 +304,16 @@ reviewer: {name: jdoe}
 }
 
 // ————————————————————————————— ENGAGEMENTS (list)
-function Engagements({ runs, runsLoading, onSelect, selected, refresh, onNew }) {
+function Engagements({ runs, runsLoading, onSelect, selected, refresh, onNew, t }) {
   return (
     <div style={card}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
                     marginBottom: 8 }}>
         <h2 style={{ fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase",
-                     color: SLATE, margin: 0 }}>Engagements</h2>
+                     color: SLATE, margin: 0 }}>{t.engagements}</h2>
         <div style={{ display: "flex", gap: 8 }}>
-          <button style={btnGhost} onClick={refresh}>↻ Refresh</button>
-          {onNew && <button style={btn} onClick={onNew}>+ New</button>}
+          <button style={btnGhost} onClick={refresh}>{t.refresh}</button>
+          {onNew && <button style={btn} onClick={onNew}>{t.newBtn}</button>}
         </div>
       </div>
       {runsLoading && (
@@ -312,8 +329,8 @@ function Engagements({ runs, runsLoading, onSelect, selected, refresh, onNew }) 
         const lines = runs.reduce((s, r) => s + (r.population || 0), 0);
         return (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 14 }}>
-            {[["Engagements", runs.length], ["Finalized", finalized],
-              ["Awaiting review", awaiting], ["Lines analyzed", lines.toLocaleString()]].map(([l, v]) => (
+            {[["Engagements", runs.length, t.kpi.engagements], ["Finalized", finalized, t.kpi.finalized],
+              ["Awaiting", awaiting, t.kpi.awaiting], ["Lines", lines.toLocaleString(), t.kpi.lines]].map(([, v, l]) => (
               <div key={l} style={{ padding: 14, background: PAPER, borderRadius: 8 }}>
                 <div style={{ fontSize: 22, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{v}</div>
                 <div style={{ fontSize: 10.5, color: SLATE, textTransform: "uppercase", letterSpacing: 1 }}>{l}</div>
@@ -321,19 +338,27 @@ function Engagements({ runs, runsLoading, onSelect, selected, refresh, onNew }) 
           </div>);
       })()}
       {runs.map(r => (
-        <div key={r.run_id} onClick={() => onSelect(r.run_id)} style={{
+        <div key={r.run_id} style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "11px 6px", borderBottom: `1px solid ${HAIR}`, cursor: "pointer",
+          padding: "11px 6px", borderBottom: `1px solid ${HAIR}`,
           background: selected === r.run_id ? PAPER : "transparent",
           borderRadius: selected === r.run_id ? 6 : 0 }}>
-          <div>
+          <div onClick={() => onSelect(r.run_id)} style={{ flex: 1, cursor: "pointer" }}>
             <b className="mono" style={{ fontSize: 13.5 }}>{r.run_id}</b>
-            <div style={{ fontSize: 11.5, color: SLATE }}>phase {r.phase || "—"}</div>
+            <div style={{ fontSize: 11.5, color: SLATE }}>{t.phase} {r.phase || "—"}</div>
           </div>
-          {chip(tup(r.status), {
-            background: r.status === "finalized" ? "#fff" : "#fdf3e3",
-            color: r.status === "finalized" ? INK : AMBER,
-            border: `1.2px solid ${r.status === "finalized" ? INK : AMBER}` })}
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {chip(tup(r.status), {
+              background: r.status === "finalized" ? "#fff" : "#fdf3e3",
+              color: r.status === "finalized" ? INK : AMBER,
+              border: `1.2px solid ${r.status === "finalized" ? INK : AMBER}` })}
+            <button title={t.deleteTitle} onClick={e => { e.stopPropagation();
+              if (window.confirm(t.deleteConfirm(r.run_id))) {
+                api.deleteRun(r.run_id).then(() => refresh()).catch(err => window.alert(err.message));
+              } }}
+              style={{ background: "none", border: "none", cursor: "pointer",
+                       color: FAINT, fontSize: 14, padding: "2px 6px" }}>🗑</button>
+          </div>
         </div>
       ))}
     </div>
@@ -654,6 +679,9 @@ function AppInner({ onSignOut }) {
   const [runsLoading, setRunsLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [page, setPage] = useState("engage");
+  const [lang, setLang] = useState(() => localStorage.getItem("jeagent_lang") || "en");
+  const t = STRINGS[lang];
+  const setL = (l) => { localStorage.setItem("jeagent_lang", l); setLang(l); };
   const refresh = () => { setRunsLoading(true);
     return api.runs().then(r => { setRuns(r.runs); setRunsLoading(false); return r.runs; })
     .catch(() => { setRunsLoading(false); sessionStorage.removeItem("jeagent_key"); onSignOut(); }); };
@@ -663,33 +691,43 @@ function AppInner({ onSignOut }) {
   return (
     <div style={{ background: PAPER, minHeight: "100vh" }}>
       <div style={{ background: INK, color: "#fff", padding: "14px 0" }}>
-        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 22px",
+        <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 28px",
                       display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 10, letterSpacing: 2.6, textTransform: "uppercase",
-                          color: "#aeb6bf" }}>Journal Entry Testing · ISA 240 / AS 2401</div>
-            <div style={{ fontSize: 19, fontWeight: 800 }}>JE Agent Console</div>
+                          color: "#aeb6bf" }}>{t.eyebrow}</div>
+            <div style={{ fontSize: 19, fontWeight: 800 }}>{t.appTitle}</div>
           </div>
-          <button style={{ ...btn, background: "transparent", color: "#fff",
-                           border: `1.2px solid #4b5563` }} onClick={onSignOut}>Sign out</button>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <div style={{ display: "flex", border: "1.2px solid #4b5563", borderRadius: 7, overflow: "hidden" }}>
+              {["en", "fr"].map(l => (
+                <button key={l} onClick={() => setL(l)} style={{
+                  background: lang === l ? "#fff" : "transparent",
+                  color: lang === l ? INK : "#9ca3af", border: "none", cursor: "pointer",
+                  padding: "5px 10px", fontSize: 11.5, fontWeight: 700,
+                  textTransform: "uppercase" }}>{l}</button>))}
+            </div>
+            <button style={{ ...btn, background: "transparent", color: "#fff",
+                             border: `1.2px solid #4b5563` }} onClick={onSignOut}>{t.signOut}</button>
+          </div>
         </div>
       </div>
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 22px" }}>
+      <div style={{ maxWidth: "100%", margin: "0 auto", padding: "0 28px" }}>
         <nav style={{ display: "flex", gap: 4, borderBottom: `2px solid ${INK}`, marginBottom: 18 }}>
           {PAGES.map(p => (
             <button key={p.id} onClick={() => setPage(p.id)} style={{
               background: "none", border: "none", padding: "12px 16px 10px", cursor: "pointer",
               fontWeight: 700, fontSize: 13, color: page === p.id ? INK : SLATE,
               borderBottom: page === p.id ? `3px solid ${AMBER}` : "3px solid transparent" }}>
-              {p.label}</button>))}
+              {t.pages[p.id]}</button>))}
         </nav>
         {page === "configure" && <Configure />}
         {page === "new" && <NewEngagement onStarted={opened} />}
         {(page === "engage" && !hasRun) && (
-          <Engagements runs={runs || []} runsLoading={runsLoading} selected={selected}
+          <Engagements runs={runs || []} runsLoading={runsLoading} selected={selected} t={t}
                        onSelect={setSelected} refresh={refresh} onNew={() => setPage("new")} />)}
         {(page === "engage" && hasRun) && (
-          <Engagements runs={runs || []} runsLoading={runsLoading} selected={selected}
+          <Engagements runs={runs || []} runsLoading={runsLoading} selected={selected} t={t}
                        onSelect={opened} refresh={refresh} onNew={() => setPage("new")} />)}
         {hasRun && page === "monitor" && <Monitor runId={selected} />}
         {hasRun && page === "review" && <Review runId={selected} />}

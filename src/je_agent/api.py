@@ -115,6 +115,23 @@ def list_runs():
     return {"runs": runs}
 
 
+@app.delete("/api/runs/{run_id}", dependencies=[Depends(require_key)])
+def delete_run(run_id: str):
+    """Delete an engagement and all its artifacts. Refuses while a pipeline
+    process holds the lock (never delete a running engagement)."""
+    import shutil
+
+    root = _runs_root()
+    d = root / run_id
+    if not d.exists():
+        raise HTTPException(404, f"unknown run {run_id}")
+    lock = d / "run.lock"
+    if lock.exists():
+        raise HTTPException(409, "run is locked (pipeline running?) — unlock first")
+    shutil.rmtree(d)
+    return {"deleted": run_id}
+
+
 @app.get("/api/runs/{run_id}", dependencies=[Depends(require_key)])
 def run_detail(run_id: str):
     ctx = RunContext(_runs_root() / run_id)

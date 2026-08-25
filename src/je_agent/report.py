@@ -574,6 +574,10 @@ def build_report(run_dir: Path) -> Path:
     n_llm = store.con.execute("SELECT count(*) FROM llm_outputs WHERE run_id=?",
                               [run_id]).fetchone()[0]
 
+    from .report_lang import labels
+    lang = (getattr(getattr(config, "report_lang", None), "lang", "en") or "en")
+    L = labels(lang)
+
     facts = build_facts_block(con, config, universe, None, store)
 
     tp = ctx.llm_dir / "triage_report.json"
@@ -611,54 +615,49 @@ def build_report(run_dir: Path) -> Path:
         return re.sub(r"\[fact:([a-z0-9_]+)\]",
                       lambda m: f"<b>{_esc(facts.get(m.group(1), '?'))}</b>", _esc(text))
 
-    H = [f"<style>{CSS}</style><div class='wrap'>"]
+    H = [f"<!DOCTYPE html><html lang=\"{lang}\"><head><meta charset=\"utf-8\">"
+         f"<title>{_esc(run_id)} — JE Agent</title><style>{CSS}</style></head><body><div class='wrap'>"]
     gen_ts = datetime.now().strftime("%Y-%m-%d %H:%M")
     fin = status == "finalized"
 
     # ---------------------------------------------------------- cover page
-    gate_note = ("All finalize gates passed (review completeness, procedure completeness, "
-                 "citation validity, limitation acceptance)."
-                 if fin else "Run not yet finalized — gates pending.")
     H.append(f"""
 <div class="coverpage">
   <div class="cv-head">
-    <div class="cv-firm">Journal Entry Testing · ISA 240 / AS 2401</div>
+    <div class="cv-firm">{L['eyebrow']}</div>
     <div class="cv-title">{_esc(run_id)}</div>
-    <div class="cv-sub">{_esc(config.source.system.upper())} journal-entry extract —
-      risk assessment, AI-assisted triage and auditor review workpaper</div>
+    <div class="cv-sub">{_esc(config.source.system.upper())} {L['sub']}</div>
   </div>
   <hr class="cv-rule">
   <div class="cv-body">
-    <div class="cv-eyebrow">Engagement summary</div>
+    <div class="cv-eyebrow">{L['eng_summary']}</div>
     <table class="cv">
-      <tr><td class="k">Period under review</td><td class="v">{_esc(config.period_end)}</td></tr>
-      <tr><td class="k">Source system / extract</td><td class="v">{_esc(config.source.system.upper())}
+      <tr><td class="k">{L['period']}</td><td class="v">{_esc(config.period_end)}</td></tr>
+      <tr><td class="k">{L['source']}</td><td class="v">{_esc(config.source.system.upper())}
         · {_esc(extract_name)} ({_esc(extract_sha[:16])}…) </td></tr>
-      <tr><td class="k">Population tested</td>
-          <td class="v">{population:,} lines</td></tr>
-      <tr><td class="k">Materiality</td>
-          <td class="v">overall {_esc(_money(config.materiality.overall, ccy))} ·
-            performance {_esc(_money(config.materiality.performance, ccy))}</td></tr>
-      <tr><td class="k">Flagged for review</td>
-          <td class="v">{flagged_docs:,} documents → universe of {universe.selected:,}
-            ({dec_counts['inspect']} inspect · {dec_counts['accept']} accepted ·
-            {dec_counts['override']} override)</td></tr>
-      <tr><td class="k">Benford conformity (C2, informational)</td>
+      <tr><td class="k">{L['population']}</td>
+          <td class="v">{population:,} {L['lines']}</td></tr>
+      <tr><td class="k">{L['materiality']}</td>
+          <td class="v">{L['overall']} {_esc(_money(config.materiality.overall, ccy))} ·
+            {L['performance']} {_esc(_money(config.materiality.performance, ccy))}</td></tr>
+      <tr><td class="k">{L['flagged']}</td>
+          <td class="v">{flagged_docs:,} {L['documents']} → {L['universe_of']} {universe.selected:,}
+            ({dec_counts['inspect']} {L['inspect']} · {dec_counts['accept']} {L['accepted']} ·
+            {dec_counts['override']} {L['override']})</td></tr>
+      <tr><td class="k">{L['benford']}</td>
           <td class="v">{('MAD ' + format(ben['mad'], '.4f') + ' — '
                           + _esc(ben.get('nigrini_assessment', '—')))
                          if ben.get('mad') is not None else 'insufficient data'}</td></tr>
-      <tr><td class="k">Auditor</td><td class="v">{_esc(config.reviewer.name)}
-        · decisions hash-chained and {'verified' if chains_ok else 'BROKEN'}</td></tr>
-      <tr><td class="k">Report status</td>
+      <tr><td class="k">{L['auditor']}</td><td class="v">{_esc(config.reviewer.name)}
+        · {L['hash_chained']} {L['verified'] if chains_ok else L['broken']}</td></tr>
+      <tr><td class="k">{L['status']}</td>
           <td class="v"><span class="status-pill {'ok' if fin else 'warn'}">
-            {'FINALIZED' if fin else 'DRAFT'}</span> — {gate_note}</td></tr>
+            {L['finalized'] if fin else L['draft']}</span> — {L['all_gates'] if fin else L['draft_gates']}</td></tr>
     </table>
   </div>
   <div class="cv-foot">
-    <span style="max-width:520px"><b>Confidential.</b> Prepared with JE Agent —
-      deterministic rules, LLM-assisted triage, human judgment. Engagement
-      workpaper; see limitations before relying on its contents.</span>
-    <span>Generated {gen_ts}</span>
+    <span style="max-width:520px"><b>{L['confidential'].split('.')[0]}.</b> {L['confidential'].split('.', 1)[1].strip()}</span>
+    <span>{L['generated']} {gen_ts}</span>
   </div>
 </div>""")
 
