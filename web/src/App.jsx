@@ -56,6 +56,51 @@ function Halftone({ className = "", flip = false }) {
   );
 }
 
+/* Ambient background: 3 slow-drifting blurred orbs (aurora) */
+function Aurora() {
+  const wrap = useRef(null);
+  useGSAP(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    gsap.to(".orb-a", { x: 90, y: -60, scale: 1.15, duration: 26, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".orb-b", { x: -110, y: 70, duration: 32, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".orb-c", { x: 60, y: 100, scale: 0.9, duration: 38, yoyo: true, repeat: -1, ease: "sine.inOut" });
+  }, { scope: wrap });
+  return (
+    <div ref={wrap} aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
+      <div className="orb-a absolute -top-40 right-[8%] size-[560px] rounded-full bg-amber/[0.07] blur-[120px]" />
+      <div className="orb-b absolute bottom-[-160px] left-[4%] size-[520px] rounded-full bg-emerald-700/[0.05] blur-[130px]" />
+      <div className="orb-c absolute left-[38%] top-[30%] size-[420px] rounded-full bg-orange-300/20 blur-[110px]" />
+    </div>);
+}
+
+/* Drifting amber motes — dark surfaces only (login cover) */
+function Motes({ count = 26 }) {
+  const wrap = useRef(null);
+  const dots = useRef([]);
+  if (!dots.current.length) {
+    dots.current = Array.from({ length: count }, (_, i) => ({
+      id: i, left: Math.random() * 100, top: Math.random() * 100,
+      size: 1.5 + Math.random() * 2.5, dur: 14 + Math.random() * 18, delay: -Math.random() * 20,
+    }));
+  }
+  useGSAP(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    dots.current.forEach(d => {
+      gsap.fromTo(`.mote-${d.id}`, { y: 30, autoAlpha: 0 },
+        { y: -140, autoAlpha: 1, duration: d.dur, delay: d.delay, repeat: -1,
+          ease: "none", overwrite: false });
+    });
+  }, { scope: wrap });
+  return (
+    <div ref={wrap} aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {dots.current.map(d => (
+        <span key={d.id} className={`mote mote-${d.id} absolute rounded-full bg-amber`}
+              style={{ left: `${d.left}%`, top: `${d.top}%`, width: d.size, height: d.size, opacity: 0 }} />
+      ))}
+    </div>);
+}
+
 /* Organic ink blob (login hero) */
 function InkBlob({ className }) {
   return (
@@ -96,10 +141,13 @@ function Login({ onOk }) {
   };
   return (
     <div ref={root} className="grid min-h-screen bg-paper lg:grid-cols-[1.1fr_1fr]">
+      <Aurora />
+      <div className="grain" />
       {/* left: cover — full ink panel, guaranteed contrast */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-ink p-12 lg:flex">
         <InkBlob className="lg-blob -left-40 -top-40 h-[900px] w-[900px] text-[#2a2926]" />
         <Halftone className="bottom-10 right-10 h-44 w-72 text-amber/80" flip />
+        <Motes count={30} />
         <div className="relative z-10 flex items-center gap-2.5">
           <Scale className="h-5 w-5 text-amber" strokeWidth={2.4} />
           <span className="text-sm font-bold tracking-tight text-paper">JE Agent</span>
@@ -173,9 +221,11 @@ function AppInner({ onSignOut }) {
 
   return (
     <div className="flex min-h-screen bg-paper text-ink">
+      <Aurora />
+      <div className="grain" />
       {/* ———— SIDEBAR ———— */}
-      <aside className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-hairline bg-card
-                         transition-[width] duration-300 ${collapsed ? "w-[68px]" : "w-[228px]"}`}>
+      <aside className={`sticky top-0 z-30 flex h-screen shrink-0 flex-col border-r border-hairline bg-card/80
+                         backdrop-blur-xl transition-[width] duration-300 ${collapsed ? "w-[68px]" : "w-[228px]"}`}>
         <div className="flex items-center gap-2.5 px-4 py-5">
           <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-ink">
             <Scale className="size-4.5 text-amber" strokeWidth={2.2} /></div>
@@ -218,7 +268,7 @@ function AppInner({ onSignOut }) {
 
       {/* ———— MAIN ———— */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b border-hairline bg-paper/85 backdrop-blur-md">
+        <header className="sticky top-0 z-20 border-b border-hairline bg-paper/70 backdrop-blur-xl">
           <div className="flex min-h-[60px] items-center justify-between gap-4 px-6 py-3">
             <div className="min-w-0">
               <h2 className="truncate text-[17px] font-bold tracking-tight">{t.pages[page]}</h2>
@@ -315,7 +365,7 @@ function Engagements({ runs, runsLoading, onSelect, selected, refresh, onNew, t 
 
       <Card className="rounded-xl border-hairline shadow-[0_1px_3px_rgba(31,30,28,0.06)]">
         <CardHeader className="flex-row items-center justify-between border-b border-hairline py-4">
-          <CardTitle className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-soft">{t.engagements}</CardTitle>
+          <CardTitle className="text-[12px] font-semibold uppercase tracking-[0.16em] text-amber/90">{t.engagements}</CardTitle>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={refresh}>{t.refresh}</Button>
             <Button size="sm" className="bg-accent text-white hover:bg-accent/85" onClick={onNew}>{t.newBtn}</Button>
