@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { api, BASE } from "./api";
 
 const INK = "#111827", SLATE = "#4b5563", FAINT = "#9ca3af", HAIR = "#e5e7eb",
@@ -393,8 +393,15 @@ function Review({ runId }) {
   const [reviewer, setReviewer] = useState("jdoe");
   const [msg, setMsg] = useState("");
   const [reasoning, setReasoning] = useState({ ref: null, decision: null, text: "" });
+  const [detail, setDetail] = useState(null);  // {entry_ref, lines, flags} expanded
   const load = () => api.universe(runId).then(setU).catch(e => setMsg(e.message));
   useEffect(() => { load(); }, [runId]);
+  const toggle = async ref => {
+    if (detail && detail.entry_ref === ref) return setDetail(null);
+    try { setDetail({ entry_ref: ref, lines: null, flags: null }); 
+          const d = await api.entryDetail(runId, ref); setDetail(d); }
+    catch (e) { setMsg(e.message); setDetail(null); }
+  };
   if (!u) return <div style={card}>Loading review queue…</div>;
   const decided = u.entries.filter(e => e.decision !== "pending");
   const pending = u.entries.filter(e => e.decision === "pending");
@@ -465,10 +472,12 @@ function Review({ runId }) {
             <th></th>
           </tr></thead>
           <tbody>
-            {u.entries.slice(0, 60).map(e => (
-              <tr key={e.entry_ref}>
+            {u.entries.slice(0, 60).map((e) => (
+              <Fragment key={e.entry_ref}>
+              <tr>
                 <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`, fontFamily: mono, fontWeight: 700 }}>
-                  {e.entry_ref}</td>
+                  <span style={{ cursor: "pointer", color: INK }}
+                        onClick={() => toggle(e.entry_ref)}>{e.entry_ref}</span></td>
                 <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}` }}>{e.rules_hit}</td>
                 <td style={{ padding: "6px 9px", borderBottom: `1px solid ${HAIR}`, textAlign: "right",
                              fontVariantNumeric: "tabular-nums" }}>
@@ -489,7 +498,45 @@ function Review({ runId }) {
                               style={{ ...btnGhost, padding: "4px 9px", fontSize: 11.5 }}>accept</button>
                     </>) : <span style={{ color: OI_GREEN }}>✓</span>}
                 </td>
-              </tr>))}
+              </tr>
+              {detail && detail.entry_ref === e.entry_ref && (
+                <tr key={`${e.entry_ref}-detail`}>
+                  <td colSpan={5} style={{ padding: "0 9px 12px", borderBottom: `1px solid ${HAIR}`, background: PAPER }}>
+                    {detail.lines ? (
+                      <div style={{ fontSize: 12, paddingTop: 4 }}>
+                        <div style={{ marginBottom: 6, color: SLATE, fontSize: 11 }}>
+                          {Object.keys(detail.flags).length
+                            ? <span style={{ color: AMBER }}>Rules hit: {Object.keys(detail.flags).join(", ")}</span>
+                            : <span style={{ color: FAINT }}>No rule flags reported</span>}
+                        </div>
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
+                          <thead><tr style={{ color: SLATE, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                            <th style={{ textAlign: "left", padding: "3px 6px" }}>ln</th>
+                            <th style={{ textAlign: "left", padding: "3px 6px" }}>date</th>
+                            <th style={{ textAlign: "left", padding: "3px 6px" }}>account</th>
+                            <th style={{ textAlign: "left", padding: "3px 6px" }}>user</th>
+                            <th style={{ textAlign: "right", padding: "3px 6px" }}>amount</th>
+                            <th style={{ textAlign: "left", padding: "3px 6px" }}>description</th>
+                          </tr></thead>
+                          <tbody>
+                            {detail.lines.map(l => (
+                              <tr key={l.line_no} style={{ borderTop: `1px solid ${HAIR}` }}>
+                                <td style={{ padding: "4px 6px", fontFamily: mono }}>{l.line_no}</td>
+                                <td style={{ padding: "4px 6px", fontFamily: mono }}>{l.posting_date}</td>
+                                <td style={{ padding: "4px 6px", fontFamily: mono }}>{l.account}</td>
+                                <td style={{ padding: "4px 6px" }}>{l.username}</td>
+                                <td style={{ padding: "4px 6px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                                  {Number(l.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                                <td style={{ padding: "4px 6px", color: SLATE }}>{l.description || "—"}</td>
+                              </tr>))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : <div style={{ color: FAINT, fontSize: 11.5, paddingTop: 4 }}>Loading lines…</div>}
+                  </td>
+                </tr>)}
+              </Fragment>
+            ))}
           </tbody>
         </table>
         {u.entries.length > 60 && <p style={{ color: SLATE, fontSize: 11.5, marginTop: 8 }}>

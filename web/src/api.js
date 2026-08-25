@@ -23,6 +23,7 @@ export const api = {
   runs: () => req("/api/runs"),
   runDetail: id => req(`/api/runs/${id}`),
   metrics: id => req(`/api/runs/${id}/metrics`),
+  entryDetail: (id, ref) => req(`/api/runs/${id}/entry/${encodeURIComponent(ref)}`),
   universe: id => req(`/api/runs/${id}/universe`),
   saveDecisions: (id, reviewer, decisions) =>
     req(`/api/runs/${id}/decisions`, {

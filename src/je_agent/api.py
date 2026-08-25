@@ -280,6 +280,40 @@ def run_metrics(run_id: str):
         store.close()
 
 
+@app.get("/api/runs/{run_id}/entry/{entry_ref}", dependencies=[Depends(require_key)])
+def get_entry(run_id: str, entry_ref: str):
+    """Journal lines + rules that fired for one entry (review drill-down)."""
+    import duckdb
+
+    ctx = RunContext(_runs_root() / run_id)
+    if not ctx.duckdb_path.exists():
+        raise HTTPException(404, "run has no database")
+    con = duckdb.connect(str(ctx.duckdb_path), read_only=True)
+    try:
+        lines = con.execute(
+            "SELECT line_no, posting_date, document_date, username, is_manual, "
+            "account, amount, currency, description, source_doc "
+            "FROM journal_lines WHERE entry_ref=? ORDER BY line_no",
+            [entry_ref]).fetchall()
+        cols = ["line_no", "posting_date", "document_date", "username", "is_manual",
+                "account", "amount", "currency", "description", "source_doc"]
+        lines = [dict(zip(cols, r)) for r in lines]
+        flags = {}
+        rules = ["manual_entries", "period_end", "round_amounts", "date_divergence",
+                 "entry_splitting", "balance_check", "unusual_users", "unusual_pairs",
+                 "reversals", "high_risk_system_pairs"]
+        for r in rules:
+            try:
+                if con.execute(f"SELECT 1 FROM flags_{r} WHERE entry_ref=? LIMIT 1",
+                               [entry_ref]).fetchone():
+                    flags[r] = True
+            except Exception:
+                pass
+        return {"entry_ref": entry_ref, "lines": lines, "flags": flags}
+    finally:
+        con.close()
+
+
 class DecisionsBody(BaseModel):
     reviewer: str
     decisions: list[dict]     # [{entry_ref, decision, reason}]
