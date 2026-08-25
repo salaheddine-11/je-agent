@@ -1,0 +1,18 @@
+
+=== medium: 20,210 lines (10,000 base docs, 105 injections) ===
+  ingest 20,210 rows (0 rejected) — 4.4s
+  rule flags: manual_entries=18142, period_end=28, round_amounts=36, date_divergence=44, entry_splitting=259, balance_check=6, unusual_users=16, unusual_pairs=22, reversals=24, high_risk_system_pairs=6
+  scored in 4.1s — aggregate precision=0.4234 recall=1.0 f1=0.5949 | universe_recall=1.0 (7/105 injected make the universe)
+    ✓ round_amounts      recall=100.00% precision=66.67% f1=80.00% (12/12 injected, 6 fp on clean)
+    ✓ entry_splitting    recall=100.00% precision=20.35% f1=33.82% (35/35 injected, 137 fp on clean)
+    ✓ period_end         recall=100.00% precision=100.00% f1=100.00% (8/8 injected, 0 fp on clean)
+    ✓ unusual_pairs      recall=100.00% precision=100.00% f1=100.00% (10/10 injected, 0 fp on clean)
+    ✓ unusual_users      recall=100.00% precision=100.00% f1=100.00% (8/8 injected, 0 fp on clean)
+    ✓ balance_check      recall=100.00% precision=100.00% f1=100.00% (6/6 injected, 0 fp on clean)
+    ✓ reversals          recall=100.00% precision=100.00% f1=100.00% (12/12 injected, 0 fp on clean)
+    ✓ date_divergence    recall=100.00% precision=100.00% f1=100.00% (8/8 injected, 0 fp on clean)
+    ✓ high_risk_system_pairs recall=100.00% precision=100.00% f1=100.00% (6/6 injected, 0 fp on clean)
+
+💾 results: C:\Users\salah eddine\Desktop\je-agent\stress_output\results.json
+💾 notes: C:\Users\salah eddine\Desktop\je-agent\stress_output\notes.md
+EXIT=0

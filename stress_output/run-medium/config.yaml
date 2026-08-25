@@ -27,3 +27,7 @@ provider:
   base_url: https://generativelanguage.googleapis.com/v1beta/openai
   model: gemini-3.5-flash-lite
 reviewer: {name: stress-test}
+
+rule_params:
+    period_end_window_days: 1
+    unusual_account_share: 0.02

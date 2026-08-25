@@ -7,7 +7,7 @@
   "rejected": 0,
   "rule_counts": {
    "manual_entries": 18142,
-   "period_end": 90,
+   "period_end": 28,
    "round_amounts": 36,
    "date_divergence": 44,
    "entry_splitting": 259,
@@ -15,7 +15,7 @@
    "unusual_users": 16,
    "unusual_pairs": 22,
    "reversals": 24,
-   "high_risk_system_pairs": 283
+   "high_risk_system_pairs": 6
   },
   "universe_selected": 253,
   "universe_total_flagged": 9077,
@@ -300,13 +300,13 @@
    },
    "period_end": {
     "injected": 8,
-    "flagged": 45,
+    "flagged": 14,
     "tp": 8,
     "fn": 0,
-    "fp_clean": 31,
-    "precision": 0.2051,
+    "fp_clean": 0,
+    "precision": 1.0,
     "recall": 1.0,
-    "f1": 0.3404
+    "f1": 1.0
    },
    "unusual_pairs": {
     "injected": 10,
@@ -360,24 +360,24 @@
    },
    "high_risk_system_pairs": {
     "injected": 6,
-    "flagged": 283,
+    "flagged": 6,
     "tp": 6,
     "fn": 0,
-    "fp_clean": 277,
-    "precision": 0.0212,
+    "fp_clean": 0,
+    "precision": 1.0,
     "recall": 1.0,
-    "f1": 0.0415
+    "f1": 1.0
    }
   },
   "aggregate": {
    "injected": 105,
-   "flagged": 556,
+   "flagged": 248,
    "tp": 105,
    "fn": 0,
-   "fp": 451,
-   "precision": 0.1888,
+   "fp": 143,
+   "precision": 0.4234,
    "recall": 1.0,
-   "f1": 0.3177
+   "f1": 0.5949
   },
   "universe": {
    "selected": 253,

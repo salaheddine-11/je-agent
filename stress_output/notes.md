@@ -1,6 +1,6 @@
 # JE Agent — Stress-Test Results (labeled anomalies)
 
-Generated 2026-08-25 17:03 · total run time 3.0s · deterministic rules (LLM triage leg separate).
+Generated 2026-08-25 17:11 · total run time 8.9s · deterministic rules (LLM triage leg separate).
 
 ## Methodology (v2)
 
@@ -14,15 +14,15 @@ Synthetic journal populations with **known injected anomalies**, one labeled doc
 
 | Scenario | Lines | Injections | Recall | Precision | F1 | Universe recall (PM-scoped) |
 |---|---|---|---|---|---|---|
-| small | 2,106 | 53 | 100.00% | 73.61% | 84.80% | 100.00% (7/7 above-PM) |
-## small (2,106 lines)
-- round_amounts: recall 100.00%, precision 85.71%, F1 92.31% (6/6 caught, 1 false positives)
-- entry_splitting: recall 100.00%, precision 90.00%, F1 94.74% (18/18 caught, 2 false positives)
-- period_end: recall 100.00%, precision 50.00%, F1 66.67% (4/4 caught, 4 false positives)
-- unusual_pairs: recall 100.00%, precision 100.00%, F1 100.00% (5/5 caught, 0 false positives)
-- unusual_users: recall 100.00%, precision 40.00%, F1 57.14% (4/4 caught, 6 false positives)
-- balance_check: recall 100.00%, precision 100.00%, F1 100.00% (3/3 caught, 0 false positives)
-- reversals: recall 100.00%, precision 100.00%, F1 100.00% (6/6 caught, 0 false positives)
-- date_divergence: recall 100.00%, precision 100.00%, F1 100.00% (4/4 caught, 0 false positives)
-- high_risk_system_pairs: recall 100.00%, precision 30.00%, F1 46.15% (3/3 caught, 7 false positives)
-- universe: 26 selected of 26 refs; 7/7 above-PM injected anomalies in universe (recall 100.00%)
+| medium | 20,210 | 105 | 100.00% | 42.34% | 59.49% | 100.00% (7/7 above-PM) |
+## medium (20,210 lines)
+- round_amounts: recall 100.00%, precision 66.67%, F1 80.00% (12/12 caught, 6 false positives)
+- entry_splitting: recall 100.00%, precision 20.35%, F1 33.82% (35/35 caught, 137 false positives)
+- period_end: recall 100.00%, precision 100.00%, F1 100.00% (8/8 caught, 0 false positives)
+- unusual_pairs: recall 100.00%, precision 100.00%, F1 100.00% (10/10 caught, 0 false positives)
+- unusual_users: recall 100.00%, precision 100.00%, F1 100.00% (8/8 caught, 0 false positives)
+- balance_check: recall 100.00%, precision 100.00%, F1 100.00% (6/6 caught, 0 false positives)
+- reversals: recall 100.00%, precision 100.00%, F1 100.00% (12/12 caught, 0 false positives)
+- date_divergence: recall 100.00%, precision 100.00%, F1 100.00% (8/8 caught, 0 false positives)
+- high_risk_system_pairs: recall 100.00%, precision 100.00%, F1 100.00% (6/6 caught, 0 false positives)
+- universe: 253 selected of 253 refs; 7/7 above-PM injected anomalies in universe (recall 100.00%)

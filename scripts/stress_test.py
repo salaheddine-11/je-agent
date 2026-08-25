@@ -60,7 +60,11 @@ SCENARIOS = {
 }
 
 
-def config_yaml_for(scenario: str, run_id: str) -> str:
+def config_yaml_for(scenario: str, run_id: str, params: dict | None = None) -> str:
+    params_block = ""
+    if params:
+        lines = "\n".join(f"    {k}: {v}" for k, v in params.items())
+        params_block = f"\nrule_params:\n{lines}"
     return f"""run_id: {run_id}
 period_end: '2024-12-31'
 materiality: {{overall: 500000, performance: 175000, currency: USD}}
@@ -90,6 +94,7 @@ provider:
   base_url: {os.environ.get('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/openai')}
   model: {os.environ.get('PILOT_MODEL', 'gemini-3.5-flash-lite')}
 reviewer: {{name: stress-test}}
+{params_block}
 """
 
 
@@ -291,7 +296,22 @@ def main() -> int:
     ap.add_argument("--scenarios", default="small,medium,large,huge")
     ap.add_argument("--triage", action="store_true",
                     help="run the real LLM triage leg on `small` and score human-agreement")
+    ap.add_argument("--params", default="",
+                    help="rule_params overrides as key=value,key=value (e.g. "
+                         "split_threshold=175000,round_number_min_amount=100000)")
     args = ap.parse_args()
+
+    param_ov = {}
+    if args.params:
+        for kv in args.params.split(","):
+            k, v = kv.split("=", 1)
+            try:
+                param_ov[k] = int(v)
+            except ValueError:
+                try:
+                    param_ov[k] = float(v)
+                except ValueError:
+                    param_ov[k] = v
 
     OUT.mkdir(exist_ok=True)
     all_results = {}
@@ -304,7 +324,7 @@ def main() -> int:
         run_dir.mkdir(exist_ok=True)
         extract_path = run_dir / "extract.csv"
         write_csv(sc, extract_path)
-        (run_dir / "config.yaml").write_text(config_yaml_for(name, f"STRESS_{name.upper()}"),
+        (run_dir / "config.yaml").write_text(config_yaml_for(name, f"STRESS_{name.upper()}", param_ov),
                                              encoding="utf-8")
         n_lines = len(sc.lines) - 1
         print(f"\n=== {name}: {n_lines:,} lines ({sc.n_base_docs:,} base docs, "
