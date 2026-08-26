@@ -9,7 +9,19 @@
 
 This report explains **what JE Agent is, how it thinks, and what the evidence says about how well it works** — without requiring a technical background. Deep technical detail lives in the repository (`DESIGN.md`, `PROJECT_REPORT.md`); this document focuses on the logic and the proof.
 
----
+
+# Contents
+
+1. **The Problem** — why journal-entry testing needs help
+2. **The Logic** — three layers, arranged by trust
+3. **The Console** — a tour of the working environment
+4. **Does It Work?** — the stress test and what it proved
+5. **Trust & Integrity** — how the audit trail protects itself
+6. **Honest Limitations** — what JE Agent is not
+7. **Conclusion**
+- Appendix A · The ten rules in plain language
+- Appendix B · Running it yourself
+- Glossary
 
 # 1 · The Problem
 
@@ -25,7 +37,6 @@ Doing this by hand is slow and unreliable. Doing it with a plain script produces
 
 **JE Agent's answer: don't choose between rules, AI, and humans — use all three, each where it is strongest.**
 
----
 
 # 2 · The Logic — Three Layers
 
@@ -49,7 +60,6 @@ The pipeline then produces the deliverables an engagement file needs: a professi
 
 > **Design principle:** *the machine proposes, the human disposes.* Nothing reaches "final" without a named person's recorded judgment.
 
----
 
 # 3 · The Console
 
@@ -87,7 +97,6 @@ Creating an engagement is a single CSV upload — column mapping is auto-detecte
 
 The entire interface — and the generated report — switch between English and French.
 
----
 
 # 4 · Does It Work? The Stress Test
 
@@ -150,7 +159,6 @@ Precision more than doubled at zero recall cost — and because thresholds inter
 
 On the smallest scenario, the real LLM triage leg was scored separately: it **caught 100% of planted anomalies** but recommended inspecting many clean entries too (inspect precision ≈41%). That is precisely its role in the design: a broad prioritizer feeding the human, not a decider. The three layers trade roles exactly as intended — rules never miss, AI ranks everything, the human makes precision.
 
----
 
 # 5 · Trust & Integrity
 
@@ -160,7 +168,6 @@ On the smallest scenario, the real LLM triage leg was scored separately: it **ca
 - **Human-only finalization** — four gates (review complete, procedures documented, citations valid, limitations stated) block the report until a human's decisions are in place.
 - **Local-first** — engagement data stays on the machine; AI calls run in zero-retention privacy mode.
 
----
 
 # 6 · Honest Limitations
 
@@ -169,8 +176,70 @@ On the smallest scenario, the real LLM triage leg was scored separately: it **ca
 - `date_divergence` missed ~13% of plants whose fake document dates landed inside the benign window — a known edge, documented rather than hidden.
 - The synthetic populations, however realistic, are still synthetic; field behavior on live client data will differ.
 
----
 
 # 7 · Conclusion
 
 JE Agent demonstrates that journal-entry testing can be **fast, transparent, and honest at once**: near-perfect detection of designed anomaly classes at 200k-line scale in seconds, an architecture that gives the AI no final authority, integrity guarantees that make the audit trail tamper-evident, and measured limitations published alongside the strengths. Its strongest credibility asset is the last one: **it tells you exactly what it is good at, what it is not, and shows the numbers for both.**
+
+# Appendix A · The ten rules in plain language
+
+| # | Rule | What it looks for | Why it matters |
+|---|---|---|---|
+| 1 | manual_entries | entries typed by hand rather than posted by a system | manual entries are where override risk lives |
+| 2 | round_amounts | amounts on suspiciously round numbers (10,000 / 100,000…) | invented figures are rarely precise |
+| 3 | entry_splitting | one obligation broken into pieces just under approval limits | classic way to dodge a second signature |
+| 4 | period_end | entries posted in the window around period close | closing pressure is when numbers get "managed" |
+| 5 | unusual_pairs | account combinations that rarely occur together | e.g. revenue debited against an asset account |
+| 6 | unusual_users | user IDs with almost no posting history acting alone | ghost or borrowed credentials leave little trace |
+| 7 | balance_check | documents whose debits and credits don't reconcile | unbalanced postings indicate broken controls |
+| 8 | reversals | an entry reversed shortly after posting, same amount | reversal after benefit = possible concealment |
+| 9 | date_divergence | document date far from posting date | backdating shifts transactions into wrong periods |
+| 10 | high_risk_system_pairs | configured high-risk users combined with unusual accounts | privileged users need scrutiny wherever they touch |
+
+Every rule is a transparent, inspectable check — no black boxes at this layer.
+
+# Appendix B · Running it yourself
+
+JE Agent runs entirely on your machine. Three commands from a fresh clone:
+
+```bash
+git clone https://github.com/salaheddine-11/je-agent && cd je-agent
+uv sync
+uv run jeagent serve
+```
+
+Then open `http://localhost:8300` in a browser (default key: `jeagent`).
+
+**A typical engagement takes about five minutes of attention:**
+
+1. **New engagement** — drop in your CSV export; column mapping is detected automatically. Set overall/performance materiality, choose human or AI-assisted review mode, pick report language.
+2. **Monitor** — watch the pipeline stages verify themselves: ingest → rules → cross-reference → triage.
+3. **Review** — work the ledger. Every entry shows which rules fired and its full journal lines; each decision needs one click plus a written reason.
+4. **Finalize** — four gates check review completeness, procedures, citations and limitations; then the PDF report, Excel workpaper and flagged-entry list are generated.
+
+Requirements: any modern OS, Python 3.12+, ~200 MB free space. Internet is needed only for the optional AI triage calls (zero-retention mode); everything else runs locally, so client data never leaves the machine.
+
+# Glossary
+
+**Journal entry (JE)** — the atomic record of an accounting transaction: dated lines, each crediting or debiting an account.
+
+**ISA 240 / AS 2401** — international (IAASB) and US (PCAOB) standards requiring auditors to address fraud risk, explicitly including journal-entry testing.
+
+**Materiality** — the size threshold above which misstatements matter to the financial statements. JE Agent distinguishes *overall* materiality from *performance* materiality (the working threshold for testing).
+
+**Performance materiality (PM)** — see above; entries above PM drive the review universe's scope.
+
+**Universe** — the ranked selection of flagged entries the reviewer actually sees, scoped to items above performance materiality and capped for practical review.
+
+**Recall** — of all true anomalies present, the share the system caught. Missing fraud is the costly error, so recall is the headline metric.
+
+**Precision** — of everything the system flagged, the share that was genuinely anomalous. Low precision means noise the reviewer must wade through.
+
+**F1** — the balanced average of recall and precision.
+
+**Benford's law** — natural data has predictable first-digit frequencies (1 is far more common than 9). Fabricated numbers drift away from this pattern; JE Agent reports the comparison as an informational indicator only.
+
+**Hash chain** — each decision record carries a cryptographic fingerprint of the previous one, so altering history breaks the chain and becomes detectable.
+
+**Zero retention** — AI calls configured so the provider stores nothing about the request contents.
+
