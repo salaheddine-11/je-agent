@@ -2,6 +2,8 @@
 
 ### Journal-Entry Testing AI Agent — ISA 240 / AS 2401
 
+![Console](report/assets/audit_dash.png)
+
 JE Agent is an **audit assistant for journal entries**. It reads an export of
 journal entries, flags the ones that deserve a closer look, and produces a
 **professional audit report** (PDF + Excel workpaper) — with AI-assisted
@@ -147,38 +149,45 @@ uv run jeagent start -c config.yaml -e extract.csv   # CLI pipeline
 uv run jeagent status <RUN_ID>          # run status
 uv run jeagent finalize <RUN_ID>        # auto-produce deliverables
 uv run jeagent test-connection          # check your LLM endpoint
-uv run pytest                           # 169+ tests
+uv run pytest                           # 181 tests
 ```
 
 ### Layout
 
 ```
 src/je_agent/     core: rules, ingest, triage, review, narrative, report, API
-web/              React console (served by the API on one port)
+web/              React console — shadcn/ui + Tailwind v4 + GSAP
 scripts/          stress-test harness, pilots
-tests/            169+ tests incl. adversarial-injection suite
+tests/            181 tests incl. adversarial-injection suite
+report/           project report (EN + FR, Quarkdown sources + PDFs)
 DESIGN.md         consolidated design v1.6 (amendments logged)
 PROJECT_REPORT.md idea, design, tests & evaluation (with real numbers)
 ```
 
 ### Stress-test evidence (summary)
 
-Labeled synthetic populations from 2k to 200k lines:
+Labeled synthetic populations from 20k to 200k lines:
 
 - Detection recall **99–100%** at every scale (10 rules, all injected classes caught)
 - Precision falls as population grows (74% → 6%): benign patterns can look like
   anomalies at scale — **the human auditor is where precision is made**
+- Rules over structural facts (balance, reversals, rare users) are exact;
+  pattern rules (roundness, timing) trade precision for completeness
 - LLM triage caught **100%** of injected anomalies, with 41% inspect precision
 - Measured tuning: `period_end_window_days=1` + `unusual_account_share=0.02`
   double precision at zero recall loss (medium scenario)
 
-Full details in `PROJECT_REPORT.md`.
+Full details in the [project report](report/out/JE_Agent_Project_Report.pdf)
+(French edition also included in `report/out/`).
 
 ---
 
 ## Version
 
-**v1.0.0** — released. Design document v1.6 is the single source of truth;
-deviations are logged as numbered amendments, never silent.
+**v1.1.0** — console redesigned (shadcn/ui + Tailwind v4 + GSAP, warm-paper
+ledger identity), EN/FR interface and reports, review ledger with drill-down,
+decision donut and Benford analytics. Engine unchanged from v1.0. Design
+document v1.6 is the single source of truth; deviations are logged as numbered
+amendments, never silent.
 
 Built with **Hermes Agent** (Nous Research).
