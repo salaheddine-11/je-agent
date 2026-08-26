@@ -2,7 +2,6 @@
 .docauthor Salah Eddine
 .doctype paged
 .theme paper
-.lang fr
 
 # Test des écritures de journal, tranché.
 
