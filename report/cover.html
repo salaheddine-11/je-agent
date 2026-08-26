@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 0; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 210mm; height: 297mm; box-sizing: border-box;
+    background: #faf9f7;
+    font-family: "Segoe UI", Inter, system-ui, sans-serif;
+    color: #1f1e1c;
+    display: flex; flex-direction: column;
+    padding: 26mm 24mm;
+    position: relative; overflow: hidden;
+  }
+  /* halftone corner motif */
+  .dots {
+    position: absolute; right: -30mm; top: -30mm;
+    width: 120mm; height: 120mm;
+    background-image: radial-gradient(#b45309 1.3px, transparent 1.4px);
+    background-size: 7mm 7mm;
+    opacity: .28;
+    -webkit-mask-image: radial-gradient(circle at 70% 70%, black 30%, transparent 72%);
+            mask-image: radial-gradient(circle at 70% 70%, black 30%, transparent 72%);
+  }
+  .blob {
+    position: absolute; left: -40mm; bottom: -55mm;
+    width: 130mm; height: 130mm; border-radius: 50%;
+    background: radial-gradient(circle at 62% 38%, #2a2926, #1f1e1c 68%);
+    z-index: 1;
+  }
+  .top {
+    display: flex; align-items: center; gap: 4mm;
+    position: relative; z-index: 2;
+  }
+  .mark {
+    width: 11mm; height: 11mm; border-radius: 3mm;
+    background: #1f1e1c; display: grid; place-items: center;
+  }
+  .mark::after { content: "§"; color: #b45309; font-size: 6mm; font-weight: 700; line-height: 1; }
+  .brand { font-size: 12pt; font-weight: 700; letter-spacing: .02em; }
+  .mid { flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; }
+  h1 {
+    font-size: 34pt; line-height: 1.08; letter-spacing: -0.01em;
+    margin: 0; max-width: 150mm; font-weight: 800;
+  }
+  h1 .amber { color: #b45309; }
+  h1 .thin { font-weight: 350; color: #57534e; font-style: italic; }
+  .rule { width: 42mm; height: 1.1mm; background: #b45309; margin: 10mm 0 8mm; }
+  .project {
+    font-size: 13pt; font-weight: 600; color: #57534e; margin: 0 0 3mm;
+  }
+  .isa { font-size: 10pt; color: #a8a29e; letter-spacing: .14em; text-transform: uppercase; }
+  .bottom { position: absolute; left: 24mm; bottom: 22mm; z-index: 3; }
+  .author-label { font-size: 8.5pt; letter-spacing: .18em; text-transform: uppercase; color: #faf9f7aa; margin-bottom: 2mm; }
+  .author { font-size: 15pt; font-weight: 700; color: #faf9f7; }
+</style>
+</head>
+<body>
+  <div class="dots"></div>
+  <div class="blob"></div>
+
+  <div class="top">
+    <div class="mark"></div>
+    <div class="brand">JE Agent</div>
+  </div>
+
+  <div class="mid">
+    <h1>Journal-entry<br>testing,<br><span class="amber">decided.</span><br>
+        <span class="thin">Project Report</span></h1>
+    <div class="rule"></div>
+    <p class="project">JE Agent — Journal Entry Testing AI Agent</p>
+    <p class="isa">ISA 240 / AS 2401 &nbsp;·&nbsp; v1.1</p>
+  </div>
+
+  <div class="bottom">
+    <div class="author-label">Prepared by</div>
+    <div class="author">Salah Eddine</div>
+  </div>
+</body>
+</html>

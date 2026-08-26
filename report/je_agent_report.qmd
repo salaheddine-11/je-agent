@@ -34,6 +34,8 @@ Doing this by hand is slow and unreliable. Doing it with a plain script produces
 
 JE Agent processes an accounting export through three layers, arranged exactly by trustworthiness:
 
+!(580x165)[Three-layer pipeline](assets/diagram_layers.png)
+
 **Layer 1 — Deterministic rules (never wrong about *what it measures*).**
 Ten transparent rules scan every entry: round amounts, splitting, period-end timing, balance checks, rare users, odd account pairs, reversals, date divergence, high-risk users, and manual-entry concentration. Every flag comes with its reason. These rules are fast and explainable — but as we will show in §4, they also over-flag: they are a *net*, not a verdict.
 
@@ -105,6 +107,8 @@ Trust claims are cheap; we measured ours. We built a **stress harness** that gen
 | large | 100,354 | 177 | **98.9%** | 6.7% |
 | huge | 200,562 | 281 | **98.9%** | 6.4% |
 
+![Recall vs precision across scales — detection stays near-perfect while precision thins as benign look-alikes accumulate](assets/chart_scales.png)
+
 **Reading this honestly:** the system *almost never misses a planted anomaly, at any scale* (200k lines ingested in ~14 seconds). But aggregate precision falls as populations grow — because benign patterns that *look* anomalous (a big round invoice, a month-start posting) grow with the population while true fraud stays rare.
 
 ## Per-rule picture (200k-line scenario)
@@ -121,6 +125,8 @@ Trust claims are cheap; we measured ours. We built a **stress harness** that gen
 | date_divergence | 87% | 100% |
 | high_risk_system_pairs | 100% | 0.9% |
 
+![Per-rule precision at 200k lines — structural-fact rules are exact; pattern rules cast a wide net](assets/chart_rules.png)
+
 Two clean stories emerge. Rules based on **structural facts** (balance checks, reversals, rare users, account pairs) are essentially perfect on both axes. Rules based on **patterns that have innocent explanations** (round amounts, timing, size clustering) catch everything but drown in legitimate look-alikes at scale.
 
 ## The universe check
@@ -135,6 +141,8 @@ Using the same harness, two threshold changes (narrower period-end window, stric
 |---|---|---|
 | Aggregate precision | 18.9% | **42.3%** |
 | Aggregate recall | 100% | **100%** |
+
+![Tuning A/B — precision more than doubles at zero recall cost](assets/chart_tuning.png)
 
 Precision more than doubled at zero recall cost — and because thresholds interact with the population, the lesson generalizes: **rule parameters must be configured against the engagement's own materiality**, and this harness makes that calibration measurable instead of guesswork.
 
