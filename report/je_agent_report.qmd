@@ -7,18 +7,16 @@
 
 ### JE Agent, an AI-assisted audit assistant for journal entries (ISA 240 / AS 2401)
 
-Every audit season the same scene plays out somewhere. An auditor opens a client's general ledger export, and two hundred thousand journal entries pour across the screen. Debits and credits, dates and account numbers, an endless gray river of bookkeeping. And yet somewhere in that river swim a few dozen entries that were never quite honest: an invoice sliced into pieces to slip under an approval limit, a round number invented behind a desk, a reversal posted the day after a bonus was paid.
-
-This report tells the story of JE Agent, a tool built to find those entries. It explains the idea, the way the system thinks, and, most importantly, what happened when we tested whether its promises survive contact with measured evidence. No technical background is needed to follow along. The deep detail lives in the repository; this document is the story and the proof.
+This report presents JE Agent, a software tool that assists auditors in journal-entry testing under ISA 240 and AS 2401. It describes the problem the tool addresses, the rationale behind its architecture, and the results of a controlled evaluation on populations of up to 200,000 lines. The document is written for a non-technical reader; implementation detail is available in the repository documentation (`DESIGN.md`, `PROJECT_REPORT.md`).
 
 # Contents
 
-1. **The Problem**: a river of numbers, and the needle inside it
-2. **The Logic**: three layers, arranged by trust
-3. **The Console**: a tour of the working environment
-4. **Does It Work?**: planting fraud on purpose, and measuring the result
-5. **Trust & Integrity**: an audit trail that guards itself
-6. **Honest Limitations**: what JE Agent is not
+1. **The Problem**: limitations of current practice
+2. **The Logic**: a three-layer architecture
+3. **The Console**: the working environment
+4. **Evaluation**: a controlled stress test
+5. **Trust and Integrity**: audit-trail guarantees
+6. **Limitations**
 7. **Conclusion**
 - Appendix A · The ten rules in plain language
 - Appendix B · Running it yourself
@@ -26,87 +24,87 @@ This report tells the story of JE Agent, a tool built to find those entries. It 
 
 # 1 · The Problem
 
-Standards such as ISA 240 and AS 2401 require auditors to test journal entries for fraud risk. The requirement is easy to write and hard to live. Anyone who has faced a full-year export knows the three ways this job actually gets done, and why each one disappoints.
+ISA 240 and AS 2401 require the auditor to examine journal entries for indications of management override of controls. In practice this examination faces a scale problem. A full-year export commonly contains tens or hundreds of thousands of entries, and the population of genuinely relevant entries is small.
 
-The first way is **by hand**. A senior opens the ledger and reads. Experience helps, attention fails. Two hundred thousand lines cannot be read by a human being in any honest sense of the word "read", so sampling takes over, and whatever the sample misses is missed silently.
+Current practice handles this in three ways, each with a known weakness.
 
-The second way is **with a script**. Someone writes a filter: show me every round amount above fifty thousand. The script returns four thousand hits, and almost all of them are innocent. Big real invoices happen to be round. Month-end posting is normal business, not a crime. The auditor drowns in noise and stops trusting the tool.
+Manual review does not scale. Reading a complete ledger is not feasible, so work is performed on samples; entries outside the sample are never examined, and the coverage actually achieved is hard to state.
 
-The third way is **with AI alone**. Hand the ledger to a model and ask it to find fraud. It will confidently point at entries, some of them genuinely odd, others pure invention, and none of them carrying accountability. An auditor who cannot trace *why* an entry was flagged cannot defend the workpaper. A black box does not sign off.
+Scripted filters scale but produce noise. A criterion such as "round amounts above a threshold" returns large result sets dominated by legitimate postings: commercial invoices are frequently round, and posting near period end is ordinary practice. The reviewer's effort is spent dismissing false positives, and the effective quality of the screen is unknown.
 
-Each approach fails differently: humans miss volume, scripts drown in false alarms, models cannot take responsibility. The insight behind JE Agent is that this is not a reason to despair. It is a division of labor waiting to happen. Let the machine do what machines do best, let the model do what models do best, and put the decision where it always belonged, with a person who signs their name.
+AI-only analysis introduces an accountability gap. A language model can classify entries, but it cannot substantiate its output to the standard required for audit evidence, and its conclusions cannot be defended in a file review without traceable reasoning.
+
+These weaknesses are complementary rather than cumulative. Manual review provides judgment at low volume, scripts provide coverage without judgment, and models provide prioritization without accountability. JE Agent is an attempt to combine the three so that each operates only where it is reliable.
 
 # 2 · The Logic, Three Layers
 
 !(580x420)[The login cover of the console](assets/audit_login.png)
 
-JE Agent receives an accounting export and passes it through three layers, each one trusted exactly as far as it deserves.
+JE Agent processes an accounting export through three successive layers.
 
 !(580x165)[Three-layer pipeline](assets/diagram_layers.png)
 
-**Layer 1, deterministic rules.** Ten transparent checks sweep every single entry: round amounts, splitting, period-end timing, balance failures, rare users, odd account pairings, reversals, date divergence, high-risk users, manual-entry concentration. Nothing here is intelligent, and that is the point. A rule is a sentence anyone can read, argue with, and audit. When it fires, it says precisely why. These rules never get tired and never miss the pattern they encode. But they also cry wolf, as we will see in Section 4. They cast a wide net.
+**Layer 1, deterministic rules.** Ten transparent checks examine every entry: round amounts, splitting, period-end timing, balance failures, rare users, unusual account pairings, reversals, date divergence, high-risk users, and manual-entry concentration. Each check is a readable, inspectable condition that states why it fired. Rules provide complete coverage of the patterns they encode, but they also flag many legitimate postings that share surface characteristics with risk indicators. Their role is screening, not conclusion.
 
-**Layer 2, AI triage.** A language model now walks through the flagged entries and ranks them: which of these, read together, look most like a story worth a human's evening? It writes a short rationale for each. Its judgment is recorded, labeled as machine advice, and stripped of any authority. The model proposes. It never disposes.
+**Layer 2, AI triage.** A language model ranks the flagged entries by likely relevance and produces a short written rationale for each ranking. Its output is recorded as machine-generated advice and carries no decision authority. This layer reduces the order in which a human reviews material; it does not reduce the human's responsibility for what is decided.
 
-**Layer 3, human judgment.** Whatever reaches review demands an explicit decision from the auditor: inspect, or accept, with a written reason. That reason is not bureaucracy. It is the workpaper. And every decision is joined to the previous one by a cryptographic fingerprint, forming a chain in which any later tampering would be visible at a glance.
+**Layer 3, human judgment.** Every entry that reaches review requires an explicit auditor decision, inspect or accept, supported by a mandatory written reason. Decisions are recorded in a hash chain: each record contains the fingerprint of its predecessor, so any later modification of the trail is detectable.
 
-When the review closes, the pipeline produces what an engagement file actually needs: a professional PDF report in English or French, an Excel workpaper, and the list of flagged entries. The machine did the reading. The model did the sorting. The auditor did the deciding. Everyone worked within their strengths.
+On completion the pipeline produces the engagement deliverables: a report in PDF form (English or French), an Excel workpaper, and the flagged-entry listing.
 
 # 3 · The Console
 
-JE Agent runs locally. Client data stays on the machine; only optional triage calls leave it, and those run in zero-retention mode.
+JE Agent runs locally. Engagement data remains on the host machine; only optional triage calls leave it, and those operate in zero-retention mode.
 
 !(580x420)[Dashboard, engagements overview](assets/audit_dash.png)
 
-The dashboard is the morning view: every engagement, its population, its status, one line each.
+The dashboard lists every engagement with its population, phase, and status.
 
 !(580x420)[Monitor, rule outcomes and audit events](assets/audit_monitor.png)
 
-Monitor answers the question an auditor asks mid-run: what did the rules find, and what has the pipeline done so far? Every stage leaves an event in the timeline.
+Monitor shows per-rule flag counts and the pipeline event timeline for the selected run.
 
 !(580x420)[Review, the ledger](assets/audit_review.png)
 
-Review is where the engagement is won. Entries appear as a ledger; clicking one pulls out its full journal lines and names the rules that fired. A decision costs one click plus one honest sentence.
+The review queue presents ranked entries with the rules that fired. Selecting an entry opens its journal lines. Recording a decision requires one action plus a written reason.
 
 !(580x420)[Report, deliverables and analytics](assets/audit_report.png)
 
-The Report page collects the deliverables, breaks down the decisions, and compares first-digit frequencies against Benford's expectation, offered strictly as information.
+The Report page collects deliverables, summarizes decisions, and reports first-digit frequencies against the Benford reference as an informational indicator.
 
 !(580x420)[New engagement](assets/report_shot_new.png)
 
-Starting work is a CSV dropped into a box. Columns are recognized automatically; materiality and language are chosen in one form.
+An engagement starts with a CSV upload. Column mapping is detected automatically; materiality, review mode, and report language are set in one form.
 
 !(580x420)[French interface](assets/report_shot_fr.png)
 
-The interface and the generated report both speak English and French.
+The interface and the generated report are available in English and French.
 
 .pagebreak
 
-# 4 · Does It Work? The Stress Test
+# 4 · Evaluation
 
-Claims are cheap. This section is about the expensive kind of answer.
-
-To measure detection honestly, you need ground truth, and the real world does not come labeled. So we built the opposite of a demo: a stress harness that manufactures accounting populations with **fraud planted on purpose**. Every planted anomaly carries a label naming the rule that should catch it. Because the truth is known by construction, recall and precision stop being opinions and become arithmetic.
+The purpose of the evaluation was to measure detection performance against known ground truth. Real ledgers do not come labeled, so the evaluation used synthetic populations into which anomalies were injected deliberately. Every injected anomaly carries a label naming the rule expected to detect it, which allows recall and precision to be computed exactly.
 
 ## Methodology
 
-Three populations were generated, from twenty thousand to two hundred thousand lines, each deterministic under its random seed. Crucially, the clean base was made deliberately impure: roughly nine tenths manual postings and a tenth system-posted entries, legitimately rare users, legitimately large invoices, month-start postings, the ordinary texture of a real ledger. Noise exists so that false positives *can* happen and therefore can be counted. A test built on sterile data proves nothing except that the test was sterile.
+Three populations were generated, ranging from 20,210 to 200,562 lines, each deterministic under its seed. The clean base was constructed to resemble operational data rather than an idealized one: approximately 90% manual and 10% system-posted entries, users with legitimately low activity, legitimately large invoices, and month-start postings. This noise matters, because it allows false positives to occur and therefore to be counted.
 
-For each rule we score **recall**, the share of planted anomalies caught, and **precision**, the share of flags that were genuinely planted. False positives count only when they land on clean documents.
+For each rule, recall is the share of injected anomalies detected, and precision is the share of flags corresponding to an injected anomaly. Flags raised on clean documents count as false positives.
 
-## Headline results
+## Results by scale
 
-| Scenario | Lines | Planted | Recall | Precision |
+| Scenario | Lines | Injected | Recall | Precision |
 |---|---|---|---|---|
 | medium | 20,210 | 105 | **100%** | 18.9% |
 | large | 100,354 | 177 | **98.9%** | 6.7% |
 | huge | 200,562 | 281 | **98.9%** | 6.4% |
 
-![Recall vs precision across scales, detection stays near-perfect while precision thins as benign look-alikes accumulate](assets/chart_scales.png)
+![Recall vs precision across scales, detection stays near-perfect while precision declines as benign look-alikes accumulate](assets/chart_scales.png)
 
-Read these two columns as one story. Recall barely moves: at every scale, virtually nothing planted escapes. Two hundred thousand lines ingest in about fourteen seconds, and the net holds. Precision tells the harder half of the truth. As populations grow, innocent entries that merely resemble fraud grow with them, while true fraud stays rare by nature. The net catches everything, and everything includes a great deal of harmless fish.
+Recall remains at or near 100% at every scale: almost no injected anomaly escapes detection, and the largest population ingests in about fourteen seconds. Precision declines as population grows, because the frequency of benign entries that resemble risk indicators grows with the population, while genuine anomalies remain rare by nature. Both observations are expected consequences of the design intent: layer one screens completely and accepts noise in exchange.
 
-## Per-rule picture (200k-line scenario)
+## Per-rule results (200k-line scenario)
 
 | Rule | Recall | Precision |
 |---|---|---|
@@ -122,15 +120,15 @@ Read these two columns as one story. Recall barely moves: at every scale, virtua
 
 ![Per-rule precision at 200k lines, structural-fact rules are exact; pattern rules cast a wide net](assets/chart_rules.png)
 
-Two families emerge, and the split teaches more than any single number. Rules grounded in **structural facts**, balance failures, true reversals, users with no history, account pairs that should not exist, are essentially perfect in both directions. Arithmetic does not have innocent look-alikes. Rules based on **patterns with innocent explanations**, roundness, timing, size clustering, catch every plant while flagging legions of legitimate invoices. They are spotlights pointed at a crowd: everyone suspicious is lit, and so is everyone else.
+Results separate into two groups. Rules defined over structural facts, failed balance checks, true reversal pairs, users with negligible history, account pairs absent from the baseline, achieve near-perfect precision because such facts have no common innocent explanation. Rules defined over statistical tendencies, roundness, timing, size clustering, retain full recall but with declining precision, since legitimate entries share these characteristics. The distinction informs how each rule's output should be weighted in review.
 
-## The universe check
+## Universe scoping
 
-No reviewer reads every flag. The system selects a *universe*, ranked and scoped to entries above performance materiality. In testing, between ninety-seven and one hundred percent of above-materiality plants reached the reviewer. The scoping logic holds its end of the bargain.
+Reviewers see a capped, ranked selection (the universe) restricted to entries above performance materiality. Between 97% and 100% of above-materiality injected anomalies reached the universe in testing. Sub-materiality exclusion behaves as specified.
 
-## Can tuning help? Yes, measurably.
+## Parameter sensitivity
 
-Thresholds are not sacred constants, so we treated them as hypotheses. On the twenty-thousand-line scenario, two changes were tested against each other: a narrower period-end window and a stricter rarity definition for system accounts.
+Rule thresholds were treated as configurable hypotheses rather than constants. On the medium scenario, two parameters were adjusted (a narrower period-end window and a stricter rarity threshold for system accounts) and the run repeated.
 
 | Metric | Default | Tuned |
 |---|---|---|
@@ -139,41 +137,39 @@ Thresholds are not sacred constants, so we treated them as hypotheses. On the tw
 
 ![Tuning A/B, precision more than doubles at zero recall cost](assets/chart_tuning.png)
 
-Precision more than doubled while recall held perfectly. The broader lesson matters more than the numbers: thresholds interact with the population they face, so they must be calibrated against each engagement's own materiality. The harness turns that calibration from folklore into measurement.
+Precision improved by a factor of 2.2 with no loss in recall. Because thresholds interact with population composition, they should be calibrated against each engagement's own materiality; the harness makes that calibration measurable.
 
-## The AI layer, scored separately
+## Triage layer
 
-On the smallest scenario the real triage model ran against ground truth. It caught **one hundred percent of planted anomalies**, and recommended inspecting many clean entries besides, an inspect precision near forty-one percent. Read cynically, that sounds weak. Read correctly, it is the design working: the model is the broad prioritizer feeding a human, not the decider. Each layer missed nothing, ranked honestly, or decided responsibly, exactly one job each.
+The triage model was evaluated separately on the smallest scenario. It identified 100% of injected anomalies, with inspect precision of about 41%. The model therefore performs its intended function: broad prioritization ahead of human review. Precision is achieved by the reviewer, not the model, which is consistent with the allocation of responsibility described in Section 2.
 
-# 5 · Trust & Integrity
+# 5 · Trust and Integrity
 
-An audit tool with a malleable trail is a liability wearing a feature's clothing. Four guarantees anchor JE Agent.
+Four mechanisms protect the integrity of the working papers.
 
-**Hash-chained decisions.** Every reviewer decision fingerprints the one before it. Rewrite history anywhere and the chain snaps visibly.
+**Hash-chained decisions.** Each decision record includes the fingerprint of the previous record. Modification of any historical entry breaks the chain and is detectable.
 
-**Citation gates.** The generated narrative may not finalize unless each claim cites verifiable data from the run. The report cannot say what the run does not show.
+**Citation gates.** The generated narrative may not be finalized unless each factual claim cites data present in the run.
 
-**Deterministic core.** Same input, same flags, every time. Results can be reproduced years later.
+**Deterministic core.** Identical input produces identical flags, allowing results to be reproduced at any later date.
 
-**Human-only finalization.** Four gates, covering review completeness, documented procedures, valid citations, and stated limitations, block finalization until a named person's decisions are in place. No configuration flag overrides the human.
+**Human-only finalization.** Four completion gates (review coverage, documented procedures, valid citations, stated limitations) must pass before finalization. Finalization cannot occur without recorded human decisions.
 
-# 6 · Honest Limitations
+# 6 · Limitations
 
-A tool that hides its weaknesses is selling something. These are measured, published weaknesses.
+The following limitations were observed directly in the evaluation.
 
-Precision at scale is low by construction, six percent aggregate at two hundred thousand lines. The rule layer is a sieve, and the sieve is the point: fraud is rare and dressed as normality. But users must expect to review, not to receive verdicts.
+Aggregate precision at scale is low by construction: 6.4% at 200k lines. The rule layer intentionally favors completeness over selectivity, and the reviewer's workload reflects that choice. Users should expect to review flags, not receive verdicts.
 
-One rule depends on configuration. High-risk users must be declared for `high_risk_system_pairs` to mean anything; unconfigured, it measured 0.9 percent precision, and we print that number rather than bury it.
+`high_risk_system_pairs` depends on configuration. High-risk users must be declared for the rule to operate meaningfully; in the unconfigured state it measured 0.9% precision.
 
-`date_divergence` missed about thirteen percent of plants whose forged document dates landed inside the benign window. A known edge, kept on the record.
+`date_divergence` missed roughly 13% of injections whose falsified document dates fell inside the accepted window.
 
-The populations, however realistically textured, are synthetic. Live client data will surprise the harness the way it surprises everything else.
+The evaluation populations, although textured to resemble operational data, remain synthetic. Behavior on live client data will differ in ways the harness cannot fully anticipate.
 
 # 7 · Conclusion
 
-JE Agent set out to reconcile three things that usually fight each other: speed, transparency, and honesty. The evidence in this report says the reconciliation held. Near-perfect recall at two-hundred-thousand-line scale, delivered in seconds. An architecture in which the AI holds no final authority. An audit trail engineered to expose tampering. And limitations measured in the open, printed beside the strengths rather than beneath a marketing fold.
-
-That last property is the product's real thesis. A tool that tells you exactly what it is good at, exactly where it fails, and shows the arithmetic for both, has earned the right to sit next to a professional signature.
+JE Agent combines deterministic screening, AI-assisted prioritization, and mandatory human judgment for journal-entry testing under ISA 240 / AS 2401. The evaluation supports three conclusions. Detection of injected anomaly classes is near-complete and scales to 200,000 lines within seconds. The architecture assigns final authority exclusively to the reviewing auditor. And the system's limitations were measured and published alongside its strengths, which is the standard its own audit trail is designed to enforce.
 
 .pagebreak
 
